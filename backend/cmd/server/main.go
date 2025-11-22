@@ -122,6 +122,7 @@ type AuthResponse struct {
 		Email        string `json:"email"`
 		Username     string `json:"username"`
 		ProfileImage string `json:"profile_image"`
+		IsAdmin      bool   `json:"is_admin"`
 	} `json:"user"`
 }
 
@@ -227,11 +228,13 @@ func main() {
 				Email        string `json:"email"`
 				Username     string `json:"username"`
 				ProfileImage string `json:"profile_image"`
+				IsAdmin      bool   `json:"is_admin"`
 			}{
 				ID:           user.ID,
 				Email:        user.Email,
 				Username:     user.Username,
 				ProfileImage: user.ProfileImage,
+				IsAdmin:      user.IsAdmin,
 			},
 		})
 	})
@@ -271,11 +274,13 @@ func main() {
 				Email        string `json:"email"`
 				Username     string `json:"username"`
 				ProfileImage string `json:"profile_image"`
+				IsAdmin      bool   `json:"is_admin"`
 			}{
 				ID:           user.ID,
 				Email:        user.Email,
 				Username:     user.Username,
 				ProfileImage: user.ProfileImage,
+				IsAdmin:      user.IsAdmin,
 			},
 		})
 	})
@@ -340,6 +345,24 @@ func main() {
 			c.Set("userID", claims.UserID)
 			return next(c)
 		}
+	}
+
+	// Admin middleware (requires authMiddleware first)
+	adminMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return authMiddleware(func(c echo.Context) error {
+			userID := c.Get("userID").(uint)
+
+			var user User
+			if result := db.First(&user, userID); result.Error != nil {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "User not found"})
+			}
+
+			if !user.IsAdmin {
+				return c.JSON(http.StatusForbidden, map[string]string{"error": "Admin access required"})
+			}
+
+			return next(c)
+		})
 	}
 
 	// 5. APIエンドポイントの作成
@@ -994,5 +1017,88 @@ func main() {
 	}))
 
 	// サーバー起動
+	// Admin endpoints
+	// Get all users (admin only)
+	e.GET("/api/admin/users", adminMiddleware(func(c echo.Context) error {
+		var users []User
+		if err := db.Find(&users).Error; err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch users"})
+		}
+
+		type UserResponse struct {
+			ID           uint   `json:"id"`
+			Email        string `json:"email"`
+			Username     string `json:"username"`
+			ProfileImage string `json:"profile_image"`
+			IsAdmin      bool   `json:"is_admin"`
+		}
+
+		var response []UserResponse
+		for _, u := range users {
+			response = append(response, UserResponse{
+				ID:           u.ID,
+				Email:        u.Email,
+				Username:     u.Username,
+				ProfileImage: u.ProfileImage,
+				IsAdmin:      u.IsAdmin,
+			})
+		}
+
+		return c.JSON(http.StatusOK, response)
+	}))
+
+	// Get system stats (admin only)
+	e.GET("/api/admin/stats", adminMiddleware(func(c echo.Context) error {
+		var userCount int64
+		var projectCount int64
+		var adminCount int64
+
+		db.Model(&User{}).Count(&userCount)
+		db.Model(&Project{}).Count(&projectCount)
+		db.Model(&User{}).Where("is_admin = ?", true).Count(&adminCount)
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"total_users":    userCount,
+			"total_projects": projectCount,
+			"total_admins":   adminCount,
+		})
+	}))
+
+	// Toggle admin status (admin only)
+	e.PUT("/api/admin/users/:id/toggle-admin", adminMiddleware(func(c echo.Context) error {
+		userID := c.Param("id")
+
+		var user User
+		if result := db.First(&user, userID); result.Error != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		}
+
+		user.IsAdmin = !user.IsAdmin
+		if err := db.Save(&user).Error; err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user"})
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"id":       user.ID,
+			"email":    user.Email,
+			"is_admin": user.IsAdmin,
+		})
+	}))
+
+	// Delete user (admin only)
+	e.DELETE("/api/admin/users/:id", adminMiddleware(func(c echo.Context) error {
+		userID := c.Param("id")
+
+		// Delete user's projects and related data
+		db.Where("user_id = ?", userID).Delete(&Project{})
+
+		// Delete user
+		if result := db.Delete(&User{}, userID); result.Error != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete user"})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "User deleted successfully"})
+	}))
+
 	e.Logger.Fatal(e.Start(":8080"))
 }

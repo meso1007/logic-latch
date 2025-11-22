@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "@/hooks/useTranslations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,7 +28,8 @@ import {
     ChevronUp,
     Sparkles,
     HelpCircle,
-    Settings
+    Settings,
+    Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +46,7 @@ export function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const { user, token, logout } = useAuth();
+    const { t } = useTranslations();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -67,7 +71,7 @@ export function Sidebar() {
         }
     }, [token]);
 
-    const filteredProjects = projects.filter(project =>
+    const filteredProjects = (projects || []).filter(project =>
         project.goal.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -79,8 +83,8 @@ export function Sidebar() {
                 isCollapsed ? "w-16" : "w-64"
             )}
         >
-            {/* Header: Toggle & Search */}
-            <div className="p-4 flex items-center justify-between">
+            {/* Header: Toggle & Language Switcher */}
+            <div className="p-4 flex items-center justify-between gap-2">
                 <Button
                     variant="ghost"
                     size="icon"
@@ -90,11 +94,7 @@ export function Sidebar() {
                     {isCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
                 </Button>
 
-                {!isCollapsed && (
-                    <div className="flex-1 ml-2 relative">
-                        {/* Search functionality could be a modal or expand, but for now simple input */}
-                    </div>
-                )}
+                {!isCollapsed && <LanguageSwitcher />}
             </div>
 
             {/* New Project Button */}
@@ -106,10 +106,10 @@ export function Sidebar() {
                         isCollapsed ? "justify-center px-0" : "justify-start gap-2"
                     )}
                     variant="outline"
-                    title="New Project"
+                    title={t("common.newProject")}
                 >
                     <PlusCircle className="h-5 w-5" />
-                    {!isCollapsed && <span>New Project</span>}
+                    {!isCollapsed && <span>{t("common.newProject")}</span>}
                 </Button>
             </div>
 
@@ -119,7 +119,7 @@ export function Sidebar() {
                     <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-emerald-400" />
                         <Input
-                            placeholder="Search projects..."
+                            placeholder={t("sidebar.searchProjects")}
                             className="pl-8 bg-emerald-950 border-emerald-800 text-slate-200 h-9 text-sm focus-visible:ring-emerald-600"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -130,7 +130,7 @@ export function Sidebar() {
 
             {/* Project List */}
             <div className="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin scrollbar-thumb-emerald-700 scrollbar-track-transparent">
-                {!isCollapsed && <div className="text-xs font-semibold text-emerald-400 px-2 mb-2">History</div>}
+                {!isCollapsed && <div className="text-xs font-semibold text-emerald-400 px-2 mb-2">{t("sidebar.history")}</div>}
                 <div className="space-y-1">
                     {filteredProjects.map((project) => (
                         <Link
@@ -194,7 +194,7 @@ export function Sidebar() {
                                 <p className="text-sm font-medium leading-none text-emerald-100">
                                     {user?.username || user?.email}
                                 </p>
-                                <p className="text-xs leading-none text-emerald-400">Free Plan</p>
+                                <p className="text-xs leading-none text-emerald-400">{t("sidebar.freePlan")}</p>
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-emerald-800" />
@@ -203,29 +203,41 @@ export function Sidebar() {
                             onClick={() => router.push("/upgrade")}
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
-                            <span>Upgrade Plan</span>
+                            <span>{t("menu.upgradePlan")}</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="cursor-pointer focus:bg-emerald-800 focus:text-white"
                             onClick={() => router.push("/settings")}
                         >
                             <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
+                            <span>{t("menu.settings")}</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="cursor-pointer focus:bg-emerald-800 focus:text-white"
                             onClick={() => router.push("/help")}
                         >
                             <HelpCircle className="mr-2 h-4 w-4" />
-                            <span>Help</span>
+                            <span>{t("menu.help")}</span>
                         </DropdownMenuItem>
+                        {user?.is_admin && (
+                            <>
+                                <DropdownMenuSeparator className="bg-emerald-800" />
+                                <DropdownMenuItem
+                                    className="cursor-pointer focus:bg-emerald-800 focus:text-white text-yellow-400 focus:text-yellow-300"
+                                    onClick={() => router.push("/admin")}
+                                >
+                                    <Shield className="mr-2 h-4 w-4" />
+                                    <span>{t("menu.adminDashboard")}</span>
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuSeparator className="bg-emerald-800" />
                         <DropdownMenuItem
                             className="cursor-pointer focus:bg-emerald-800 focus:text-white text-red-400 focus:text-red-300"
                             onClick={logout}
                         >
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
+                            <span>{t("common.logout")}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "@/hooks/useTranslations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { useState } from "react";
 
 export default function SettingsPage() {
     const { user, logout, updateProfile } = useAuth();
+    const { t } = useTranslations();
     const router = useRouter();
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [quizReminders, setQuizReminders] = useState(true);
@@ -35,9 +37,9 @@ export default function SettingsPage() {
         setIsUpdating(true);
         try {
             await updateProfile(username, profileImage);
-            alert("プロフィールを更新しました！");
+            alert(t("settings.profileUpdated"));
         } catch (error) {
-            alert("プロフィールの更新に失敗しました");
+            alert(t("settings.profileUpdateFailed"));
         } finally {
             setIsUpdating(false);
         }
@@ -47,8 +49,8 @@ export default function SettingsPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
             <div className="max-w-4xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">設定</h1>
-                    <p className="text-slate-600">アカウントと環境設定を管理</p>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">{t("settings.title")}</h1>
+                    <p className="text-slate-600">{t("settings.subtitle")}</p>
                 </div>
 
                 <div className="space-y-6">
@@ -57,9 +59,9 @@ export default function SettingsPage() {
                         <CardHeader>
                             <div className="flex items-center gap-2">
                                 <User className="h-5 w-5 text-emerald-600" />
-                                <CardTitle>プロフィール</CardTitle>
+                                <CardTitle>{t("settings.profile")}</CardTitle>
                             </div>
-                            <CardDescription>基本情報の管理</CardDescription>
+                            <CardDescription>{t("settings.profileDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center gap-6">
@@ -88,12 +90,12 @@ export default function SettingsPage() {
                                     </label>
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm text-slate-600">プロフィール画像をアップロード</p>
-                                    <p className="text-xs text-slate-500">JPG, PNG (最大5MB)</p>
+                                    <p className="text-sm text-slate-600">{t("settings.uploadImage")}</p>
+                                    <p className="text-xs text-slate-500">{t("settings.imageFormats")}</p>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">メールアドレス</Label>
+                                <Label htmlFor="email">{t("settings.email")}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -103,11 +105,11 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="username">ユーザー名</Label>
+                                <Label htmlFor="username">{t("settings.username")}</Label>
                                 <Input
                                     id="username"
                                     type="text"
-                                    placeholder="ユーザー名を入力"
+                                    placeholder={t("settings.usernamePlaceholder")}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="focus-visible:ring-emerald-600"
@@ -118,7 +120,7 @@ export default function SettingsPage() {
                                 onClick={handleUpdateProfile}
                                 disabled={isUpdating}
                             >
-                                {isUpdating ? "更新中..." : "プロフィールを更新"}
+                                {isUpdating ? t("settings.updating") : t("settings.updateProfile")}
                             </Button>
                         </CardContent>
                     </Card>
@@ -128,16 +130,16 @@ export default function SettingsPage() {
                         <CardHeader>
                             <div className="flex items-center gap-2">
                                 <Bell className="h-5 w-5 text-emerald-600" />
-                                <CardTitle>通知設定</CardTitle>
+                                <CardTitle>{t("settings.notifications")}</CardTitle>
                             </div>
-                            <CardDescription>通知の受信方法を管理</CardDescription>
+                            <CardDescription>{t("settings.notificationsDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label>メール通知</Label>
+                                    <Label>{t("settings.emailNotifications")}</Label>
                                     <p className="text-sm text-slate-500">
-                                        重要な更新をメールで受け取る
+                                        {t("settings.emailNotificationsDesc")}
                                     </p>
                                 </div>
                                 <Switch
@@ -148,9 +150,9 @@ export default function SettingsPage() {
                             <Separator />
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label>クイズリマインダー</Label>
+                                    <Label>{t("settings.quizReminders")}</Label>
                                     <p className="text-sm text-slate-500">
-                                        学習の進捗リマインダーを受け取る
+                                        {t("settings.quizRemindersDesc")}
                                     </p>
                                 </div>
                                 <Switch
@@ -166,13 +168,13 @@ export default function SettingsPage() {
                         <CardHeader>
                             <div className="flex items-center gap-2">
                                 <Lock className="h-5 w-5 text-emerald-600" />
-                                <CardTitle>セキュリティ</CardTitle>
+                                <CardTitle>{t("settings.security")}</CardTitle>
                             </div>
-                            <CardDescription>パスワードとセキュリティ設定</CardDescription>
+                            <CardDescription>{t("settings.securityDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="current-password">現在のパスワード</Label>
+                                <Label htmlFor="current-password">{t("settings.currentPassword")}</Label>
                                 <Input
                                     id="current-password"
                                     type="password"
@@ -180,7 +182,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-password">新しいパスワード</Label>
+                                <Label htmlFor="new-password">{t("settings.newPassword")}</Label>
                                 <Input
                                     id="new-password"
                                     type="password"
@@ -188,7 +190,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="confirm-password">パスワード確認</Label>
+                                <Label htmlFor="confirm-password">{t("settings.confirmPassword")}</Label>
                                 <Input
                                     id="confirm-password"
                                     type="password"
@@ -196,7 +198,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                             <Button className="bg-emerald-600 hover:bg-emerald-700">
-                                パスワードを変更
+                                {t("settings.changePassword")}
                             </Button>
                         </CardContent>
                     </Card>
@@ -206,15 +208,15 @@ export default function SettingsPage() {
                         <CardHeader>
                             <div className="flex items-center gap-2">
                                 <Trash2 className="h-5 w-5 text-red-600" />
-                                <CardTitle className="text-red-600">危険な操作</CardTitle>
+                                <CardTitle className="text-red-600">{t("settings.dangerZone")}</CardTitle>
                             </div>
-                            <CardDescription>アカウントの削除</CardDescription>
+                            <CardDescription>{t("settings.deleteAccount")}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-slate-600 mb-4">
-                                アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。
+                                {t("settings.deleteAccountDesc")}
                             </p>
-                            <Button variant="destructive">アカウントを削除</Button>
+                            <Button variant="destructive">{t("settings.deleteAccountButton")}</Button>
                         </CardContent>
                     </Card>
                 </div>
@@ -225,7 +227,7 @@ export default function SettingsPage() {
                         onClick={() => router.back()}
                         className="border-slate-300"
                     >
-                        戻る
+                        {t("common.back")}
                     </Button>
                 </div>
             </div>

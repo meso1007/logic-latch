@@ -1,0 +1,227 @@
+"use client";
+
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useTranslations } from "@/hooks/useTranslations";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Users, FolderKanban, Shield, Trash2, UserCog } from "lucide-react";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+interface UserData {
+    id: number;
+    email: string;
+    username: string;
+    profile_image: string;
+    is_admin: boolean;
+}
+
+interface Stats {
+    total_users: number;
+    total_projects: number;
+    total_admins: number;
+}
+
+export default function AdminPage() {
+    const { user, token } = useAuth();
+    const { t } = useTranslations();
+    const router = useRouter();
+    const [users, setUsers] = useState<UserData[]>([]);
+    const [stats, setStats] = useState<Stats | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user?.is_admin) {
+            router.push("/");
+            return;
+        }
+
+        fetchData();
+    }, [user, token, router]);
+
+    const fetchData = async () => {
+        if (!token) return;
+
+        try {
+            const [usersRes, statsRes] = await Promise.all([
+                fetch(`${API_BASE_URL} /api/admin / users`, {
+                    headers: { Authorization: `Bearer ${token} ` },
+                }),
+                fetch(`${API_BASE_URL} /api/admin / stats`, {
+                    headers: { Authorization: `Bearer ${token} ` },
+                }),
+            ]);
+
+            if (usersRes.ok) {
+                const usersData = await usersRes.json();
+                setUsers(usersData);
+            }
+
+            if (statsRes.ok) {
+                const statsData = await statsRes.json();
+                setStats(statsData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch admin data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleAdmin = async (userId: number) => {
+        if (!token) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL} /api/admin / users / ${userId}/toggle-admin`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.ok) {
+                fetchData();
+            }
+        } catch (error) {
+            console.error("Failed to toggle admin:", error);
+        }
+    };
+
+    const deleteUser = async (userId: number) => {
+        if (!token || !confirm("本当にこのユーザーを削除しますか？")) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.ok) {
+                fetchData();
+            }
+        } catch (error) {
+            console.error("Failed to delete user:", error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                <p>Loading...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+            <div className="max-w-7xl mx-auto">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">管理者ダッシュボード</h1>
+                    <p className="text-slate-600">システム全体の管理と監視</p>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">総ユーザー数</CardTitle>
+                            <Users className="h-4 w-4 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats?.total_users || 0}</div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">総プロジェクト数</CardTitle>
+                            <FolderKanban className="h-4 w-4 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats?.total_projects || 0}</div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">管理者数</CardTitle>
+                            <Shield className="h-4 w-4 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats?.total_admins || 0}</div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Users Table */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>ユーザー管理</CardTitle>
+                        <CardDescription>全ユーザーの一覧と管理</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b">
+                                        <th className="text-left p-4 font-medium">ID</th>
+                                        <th className="text-left p-4 font-medium">メール</th>
+                                        <th className="text-left p-4 font-medium">ユーザー名</th>
+                                        <th className="text-left p-4 font-medium">権限</th>
+                                        <th className="text-right p-4 font-medium">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((u) => (
+                                        <tr key={u.id} className="border-b hover:bg-slate-50">
+                                            <td className="p-4">{u.id}</td>
+                                            <td className="p-4">{u.email}</td>
+                                            <td className="p-4">{u.username || "-"}</td>
+                                            <td className="p-4">
+                                                {u.is_admin ? (
+                                                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold">
+                                                        管理者
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">
+                                                        一般
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="p-4 text-right space-x-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => toggleAdmin(u.id)}
+                                                    disabled={u.id === user?.id}
+                                                >
+                                                    <UserCog className="h-4 w-4 mr-1" />
+                                                    {u.is_admin ? "権限解除" : "管理者化"}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() => deleteUser(u.id)}
+                                                    disabled={u.id === user?.id}
+                                                >
+                                                    <Trash2 className="h-4 w-4 mr-1" />
+                                                    削除
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="mt-8 text-center">
+                    <Button variant="outline" onClick={() => router.back()}>
+                        戻る
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
