@@ -22,9 +22,10 @@ import (
 
 // フロントエンドから受け取るデータの形
 type ProposeRequest struct {
-	Goal  string `json:"goal"`  // 作りたいもの
-	Stack string `json:"stack"` // 技術スタック（任意）
-	Level string `json:"level"` // 現在のレベル
+	Goal   string `json:"goal"`   // 作りたいもの
+	Stack  string `json:"stack"`  // 技術スタック（任意）
+	Level  string `json:"level"`  // 現在のレベル
+	Locale string `json:"locale"` // 言語設定
 }
 
 type PlanStep struct {
@@ -44,6 +45,7 @@ type GenerateRequest struct {
 	Stack     string     `json:"stack"`      // 技術スタック
 	Level     string     `json:"level"`      // 現在のレベル
 	PlanSteps []PlanStep `json:"plan_steps"` // 提案されたステップ
+	Locale    string     `json:"locale"`     // 言語設定
 }
 
 type GenerateStepQuizRequest struct {
@@ -53,6 +55,7 @@ type GenerateStepQuizRequest struct {
 	StepNumber int    `json:"step_number"` // ステップ番号
 	StepTitle  string `json:"step_title"`  // ステップタイトル
 	StepDesc   string `json:"step_desc"`   // ステップ説明
+	Locale     string `json:"locale"`      // 言語設定
 }
 
 // --- DB Models ---
@@ -72,6 +75,7 @@ type Project struct {
 	Goal      string
 	Stack     string
 	Level     string
+	Locale    string
 	CreatedAt time.Time
 	Steps     []Step `gorm:"foreignKey:ProjectID"`
 }
@@ -380,7 +384,50 @@ func main() {
 			stackInfo = "未指定（AIが最適なものを提案）"
 		}
 
-		prompt := fmt.Sprintf(`
+		var prompt string
+		if req.Locale == "en" {
+			prompt = fmt.Sprintf(`
+You are an expert engineering mentor.
+Based on the user's request below, analyze the project complexity and propose the optimal tech stack and learning steps.
+
+# User Request
+- Goal: %s
+- Preferred Stack: %s
+- Current Level: %s
+
+# Tasks
+1. Adjust project complexity based on user level:
+   - beginner: Focus on basic implementation with simple features (Low-Medium)
+   - intermediate: Include practical features and best practices (Medium-High)
+   - advanced: Include advanced features, scalability, and performance optimization (High)
+
+2. Propose the optimal tech stack (respect user preference if specified)
+   **Important**: Specify the usage of each technology in parentheses
+   Example: "React (Frontend), Node.js (Backend API), PostgreSQL (Database), Redis (Cache)"
+
+3. Briefly explain the reason for selection (including complexity adjustment based on level)
+
+4. Create 3-7 learning step titles based on complexity and level:
+   - Beginner: 3-4 steps (Focus on basics)
+   - Intermediate: 4-5 steps (Practical features)
+   - Advanced: 5-7 steps (Advanced features and optimization)
+
+5. **The last step must be "Security and Vulnerability Measures"**
+
+# Output JSON Format
+{
+  "complexity": "Medium",
+  "stack": "React (Frontend), Node.js (Backend API), PostgreSQL (Database)",
+  "reason": "Considering beginner level, I chose a simple configuration focusing on basic CRUD operations...",
+  "steps": [
+    {"step": 1, "title": "Environment Setup and Project Initialization"},
+    {"step": 2, "title": "Basic Feature Implementation"},
+    {"step": 3, "title": "Security and Vulnerability Measures"}
+  ]
+}
+`, req.Goal, stackInfo, req.Level)
+		} else {
+			prompt = fmt.Sprintf(`
 あなたは熟練のエンジニアメンターです。
 ユーザーの以下の要望に基づき、プロジェクトの複雑度を分析し、最適な技術スタックと学習ステップを提案してください。
 
@@ -420,6 +467,7 @@ func main() {
   ]
 }
 `, req.Goal, stackInfo, req.Level)
+		}
 
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
@@ -461,7 +509,62 @@ func main() {
 		}
 
 		// プロンプトの作成
-		prompt := fmt.Sprintf(`
+		var prompt string
+		if req.Locale == "en" {
+			prompt = fmt.Sprintf(`
+You are an expert engineering mentor.
+Based on the user's request below, create a learning roadmap.
+
+# User Request
+- Goal: %s
+- Tech Stack: %s
+- Current Level: %s
+
+# Learning Steps (Follow these steps)
+%s
+
+# Rules
+1. Create detailed descriptions for each step following the steps above.
+
+2. **For Step 1 ONLY, include 10 multiple-choice quizzes to test necessary knowledge.**
+   For other steps (Step 2 onwards), set quizzes to an empty array [].
+
+3. Adjust quiz difficulty based on user level:
+   - beginner: Basic concepts, terminology, simple implementation methods
+   - intermediate: Best practices, common problem solving, design patterns
+   - advanced: Performance optimization, security, scalability, advanced implementation
+
+4. Gradually increase the difficulty of the 10 quizzes in Step 1, covering from basics to advanced topics suitable for the level.
+
+5. Provide detailed explanations for each quiz. Be especially thorough for beginners.
+
+# Output JSON Format
+{
+  "roadmap": [
+    {
+      "step": 1,
+      "title": "Environment Setup and Project Initialization",
+      "description": "Install Node.js, create React project...",
+      "quizzes": [
+        {
+          "question": "Which hook is used to manage state in React components?",
+          "options": ["useEffect", "useState", "useContext", "useReducer"],
+          "answer_index": 1,
+          "explanation": "useState is a hook for maintaining state in functional components..."
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "title": "Basic Feature Implementation",
+      "description": "...",
+      "quizzes": []
+    }
+  ]
+}
+`, req.Goal, req.Stack, req.Level, stepsText)
+		} else {
+			prompt = fmt.Sprintf(`
 あなたは熟練のエンジニアメンターです。
 ユーザーの以下の要望に基づき、学習ロードマップを作成してください。
 
@@ -513,6 +616,7 @@ func main() {
   ]
 }
 `, req.Goal, req.Stack, req.Level, stepsText)
+		}
 
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
@@ -536,6 +640,7 @@ func main() {
 			Goal:      req.Goal,
 			Stack:     req.Stack,
 			Level:     req.Level,
+			Locale:    req.Locale,
 			CreatedAt: time.Now(),
 		}
 		if err := db.Create(&project).Error; err != nil {
@@ -665,9 +770,44 @@ func main() {
 			return c.JSON(http.StatusOK, map[string]interface{}{"quizzes": quizzes})
 		}
 
-		prompt := fmt.Sprintf(`
+		var prompt string
+		if req.Locale == "en" {
+			prompt = fmt.Sprintf(`
+You are an expert engineering mentor.
+Create 10 multiple-choice quizzes to check understanding for the following learning step.
+
+# Project Info
+- Goal: %s
+- Tech Stack: %s
+- Level: %s
+
+# Target Step
+- Step %d: %s
+- Content: %s
+
+# Rules
+1. Create 10 questions testing knowledge required for implementing this step or related concepts.
+2. Adjust difficulty according to user level (%s).
+3. Balance basic and advanced questions.
+4. Provide detailed explanations for each quiz.
+
+# Output JSON Format
+{
+  "quizzes": [
+    {
+      "question": "Question text...",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "answer_index": 0,
+      "explanation": "Explanation..."
+    }
+  ]
+}
+`, req.Goal, req.Stack, req.Level, req.StepNumber, req.StepTitle, req.StepDesc, req.Level)
+		} else {
+			prompt = fmt.Sprintf(`
 100: あなたは熟練のエンジニアメンターです。
 101: ユーザーの以下の学習ステップに対して、理解度を確認する4択クイズを10問作成してください。
+
 102: 
 103: # プロジェクト情報
 104: - 目標: %s
@@ -695,7 +835,8 @@ func main() {
 126:     }
 127:   ]
 128: }
-129: `, req.Goal, req.Stack, req.Level, req.StepNumber, req.StepTitle, req.StepDesc, req.Level)
+`, req.Goal, req.Stack, req.Level, req.StepNumber, req.StepTitle, req.StepDesc, req.Level)
+		}
 
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
@@ -782,8 +923,16 @@ func main() {
 	// Get latest project for user
 	e.GET("/api/projects/latest", authMiddleware(func(c echo.Context) error {
 		userID := c.Get("userID").(uint)
+		locale := c.QueryParam("locale")
+
 		var project Project
-		if err := db.Where("user_id = ?", userID).Order("created_at desc").Preload("Steps").First(&project).Error; err != nil {
+		query := db.Where("user_id = ?", userID).Order("created_at desc").Preload("Steps")
+
+		if locale != "" {
+			query = query.Where("locale = ?", locale)
+		}
+
+		if err := query.First(&project).Error; err != nil {
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "No project found"})
 		}
 

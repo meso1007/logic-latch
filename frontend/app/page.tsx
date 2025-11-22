@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "@/hooks/useTranslations";
 import { useAuth } from "@/context/AuthContext";
 import { RoadmapResponse, Step } from "@/src/roadmap";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useAuth();
+  const { t, locale } = useTranslations();
 
   useEffect(() => {
     if (!token) {
@@ -66,7 +68,7 @@ export default function Home() {
         // Fetch specific project to edit
         try {
           const response = await fetch(`${API_BASE_URL}/api/projects/${editId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token} ` },
           });
           if (response.ok) {
             const data = await response.json();
@@ -86,8 +88,8 @@ export default function Home() {
 
       // Default: fetch latest project
       try {
-        const response = await fetch(`${API_BASE_URL}/api/projects/latest`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await fetch(`${API_BASE_URL}/api/projects/latest?locale=${locale}`, {
+          headers: { Authorization: `Bearer ${token} ` },
         });
         if (response.ok) {
           const data = await response.json();
@@ -105,11 +107,11 @@ export default function Home() {
     };
 
     fetchProject();
-  }, [token, searchParams, router]);
+  }, [token, searchParams, router, locale]);
 
   const handlePropose = async () => {
     if (!goal.trim()) {
-      setError("作りたいものを入力してください");
+      setError(t('Home.errorGoal'));
       return;
     }
 
@@ -126,11 +128,12 @@ export default function Home() {
           goal,
           stack: stack.trim() || undefined,
           level,
+          locale,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("プラン提案に失敗しました");
+        throw new Error(t('Home.errorMessage'));
       }
 
       const data: ProposeResponse = await response.json();
@@ -155,18 +158,19 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token} `,
         },
         body: JSON.stringify({
           goal,
           stack: editingPlan.stack,
           level,
           plan_steps: editingPlan.steps,
+          locale,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("ロードマップ生成に失敗しました");
+        throw new Error(t('Home.errorMessage'));
       }
 
       const data: RoadmapResponse = await response.json();
@@ -226,22 +230,22 @@ export default function Home() {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-slate-900">学習ロードマップ生成</h1>
-          <p className="text-slate-600">AIがあなたのプロジェクトに最適な学習プランを提案します</p>
+          <h1 className="text-4xl font-bold text-slate-900">{t('Home.title')}</h1>
+          <p className="text-slate-600">{t('Home.subtitle')}</p>
         </div>
 
         {/* Input Form */}
         <Card>
           <CardHeader>
-            <CardTitle>プロジェクト情報</CardTitle>
-            <CardDescription>作りたいものと技術スタックを入力してください</CardDescription>
+            <CardTitle>{t('Home.projectInfo')}</CardTitle>
+            <CardDescription>{t('Home.projectInfoDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="goal">作りたいもの *</Label>
+              <Label htmlFor="goal">{t('Home.goalLabel')}</Label>
               <Textarea
                 id="goal"
-                placeholder="例: タスク管理アプリ、ECサイト、チャットアプリなど"
+                placeholder={t('Home.goalPlaceholder')}
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 rows={3}
@@ -249,41 +253,41 @@ export default function Home() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stack">技術スタック（任意）</Label>
+              <Label htmlFor="stack">{t('Home.stackLabel')}</Label>
               <Input
                 id="stack"
-                placeholder="例: React, Node.js, PostgreSQL"
+                placeholder={t('Home.stackPlaceholder')}
                 value={stack}
                 onChange={(e) => setStack(e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>現在のレベル</Label>
+              <Label>{t('Home.levelLabel')}</Label>
               <RadioGroup value={level} onValueChange={setLevel}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="beginner" id="beginner" />
                   <Label htmlFor="beginner" className="font-normal cursor-pointer">
-                    初心者
+                    {t('Home.levelBeginner')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="intermediate" id="intermediate" />
                   <Label htmlFor="intermediate" className="font-normal cursor-pointer">
-                    中級者
+                    {t('Home.levelIntermediate')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="advanced" id="advanced" />
                   <Label htmlFor="advanced" className="font-normal cursor-pointer">
-                    上級者
+                    {t('levelAdvanced')}
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
             <Button onClick={handlePropose} disabled={loading || !goal.trim()} className="w-full">
-              {loading ? "生成中..." : "プランを提案"}
+              {loading ? t('Home.loading') : t('Home.proposeButton')}
             </Button>
 
             {error && (
@@ -298,26 +302,26 @@ export default function Home() {
         {proposedPlan && editingPlan && (
           <Card>
             <CardHeader>
-              <CardTitle>プランとスキルセットの確認</CardTitle>
+              <CardTitle>{t('Home.confirmPlanTitle')}</CardTitle>
               <CardDescription>
-                提案されたプランを確認し、必要に応じて編集してください
+                {t('Home.confirmPlanDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {proposedPlan.reason && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-sm text-blue-900 font-medium mb-1">選定理由</p>
+                  <p className="text-sm text-blue-900 font-medium mb-1">{t('Home.reasonLabel')}</p>
                   <p className="text-sm text-blue-800">{proposedPlan.reason}</p>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-stack">技術スタック</Label>
+                <Label htmlFor="confirm-stack">{t('Home.confirmStack')}</Label>
                 <Input
                   id="confirm-stack"
                   value={editingPlan.stack}
                   onChange={(e) => handleStackChange(e.target.value)}
-                  placeholder="例: React (フロントエンド), Node.js (バックエンド)"
+                  placeholder={t('Home.stackExample')}
                 />
                 <div className="flex flex-wrap gap-2 mt-2">
                   {editingPlan.stack.split(',').map((tech, index) => {
@@ -343,13 +347,13 @@ export default function Home() {
                   })}
                 </div>
                 <p className="text-xs text-slate-500">
-                  複雑度: <span className="font-semibold">{proposedPlan.complexity}</span>
+                  {t('Home.complexityLabel')}: <span className="font-semibold">{proposedPlan.complexity}</span>
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>学習ステップ（編集可能）</Label>
+                  <Label>{t('Home.stepsLabel')}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -359,7 +363,7 @@ export default function Home() {
                     className="gap-1"
                   >
                     <Plus className="h-4 w-4" />
-                    ステップを追加
+                    {t('Home.addStep')}
                   </Button>
                 </div>
                 <div className="space-y-3">
@@ -372,7 +376,7 @@ export default function Home() {
                         value={step.title}
                         onChange={(e) => handleStepTitleChange(step.step, e.target.value)}
                         className="flex-1"
-                        placeholder="ステップのタイトル"
+                        placeholder={t('Home.stepTitlePlaceholder')}
                       />
                       <Button
                         type="button"
@@ -381,7 +385,7 @@ export default function Home() {
                         onClick={() => handleDeleteStep(step.step)}
                         disabled={editingPlan.steps.length <= 1}
                         className="mt-1 h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                        title="ステップを削除"
+                        title={t('Home.deleteStepTitle')}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -390,14 +394,14 @@ export default function Home() {
                 </div>
                 {editingPlan.steps.length < 10 && (
                   <p className="text-xs text-slate-500">
-                    💡 ステップは最大10個まで追加できます
+                    {t('Home.maxStepsInfo')}
                   </p>
                 )}
               </div>
 
               <div className="pt-4 border-t space-y-3">
                 <p className="text-sm font-medium text-slate-700">
-                  このプロセスとスキルセットで進めますか？
+                  {t('Home.proceedPrompt')}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -405,7 +409,7 @@ export default function Home() {
                     disabled={loading}
                     className="flex-1 bg-slate-900 hover:bg-slate-800"
                   >
-                    {loading ? "生成中..." : "このプランで進める"}
+                    {loading ? t('Home.loading') : t('Home.generateButton')}
                   </Button>
                   <Button
                     onClick={() => {
@@ -415,7 +419,7 @@ export default function Home() {
                     variant="outline"
                     disabled={loading}
                   >
-                    やり直す
+                    {t('Home.retryButton')}
                   </Button>
                 </div>
               </div>
@@ -427,13 +431,13 @@ export default function Home() {
         {roadmap && (
           <Card>
             <CardHeader>
-              <CardTitle>学習ロードマップ</CardTitle>
-              <CardDescription>各ステップのクイズに挑戦しましょう（各ステップ10問）</CardDescription>
+              <CardTitle>{t('Home.roadmapTitle')}</CardTitle>
+              <CardDescription>{t('Home.quizPrompt')}</CardDescription>
 
               {/* Technology Stack Display */}
               <div className="mt-4 space-y-3 pt-4 border-t">
                 <div>
-                  <p className="text-sm font-medium text-slate-700 mb-2">使用技術</p>
+                  <p className="text-sm font-medium text-slate-700 mb-2">{t('Home.usedTech')}</p>
                   <div className="flex flex-wrap gap-2">
                     {editingPlan?.stack.split(',').map((tech, index) => {
                       const trimmedTech = tech.trim();
@@ -459,10 +463,10 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-slate-600">
-                    複雑度: <span className="font-semibold text-slate-900">{roadmap.complexity || "Medium"}</span>
+                    {t('Home.complexityLabel')}: <span className="font-semibold text-slate-900">{roadmap.complexity || "Medium"}</span>
                   </span>
                   <span className="text-slate-600">
-                    ステップ数: <span className="font-semibold text-slate-900">{(roadmap.roadmap || []).length}</span>
+                    {t('Home.stepCount')}: <span className="font-semibold text-slate-900">{(roadmap.roadmap || []).length}</span>
                   </span>
                 </div>
               </div>
@@ -483,15 +487,15 @@ export default function Home() {
                           <p className="text-slate-700 leading-relaxed mb-4">{step.description}</p>
                           <div className="flex items-center gap-2 text-sm text-slate-600">
                             <span className="bg-slate-100 px-3 py-1 rounded-full">
-                              📝 {step.quizzes?.length || 10}問のクイズ
+                              📝 {step.quizzes?.length || 10}{t('Home.quizCountSuffix')}
                             </span>
                           </div>
                         </div>
                         <Button
-                          onClick={() => window.location.href = `/quiz/${step.step}`}
+                          onClick={() => router.push(`/quiz/${step.step}`)}
                           className="bg-slate-900 hover:bg-slate-800 whitespace-nowrap"
                         >
-                          クイズに挑戦
+                          {t('Home.startQuiz')}
                         </Button>
                       </div>
                     </CardContent>

@@ -37,20 +37,18 @@ export default function AdminPage() {
             router.push("/");
             return;
         }
-
         fetchData();
     }, [user, token, router]);
 
     const fetchData = async () => {
         if (!token) return;
-
         try {
             const [usersRes, statsRes] = await Promise.all([
-                fetch(`${API_BASE_URL} /api/admin / users`, {
-                    headers: { Authorization: `Bearer ${token} ` },
+                fetch(`${API_BASE_URL}/api/admin/users`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 }),
-                fetch(`${API_BASE_URL} /api/admin / stats`, {
-                    headers: { Authorization: `Bearer ${token} ` },
+                fetch(`${API_BASE_URL}/api/admin/stats`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 }),
             ]);
 
@@ -58,7 +56,6 @@ export default function AdminPage() {
                 const usersData = await usersRes.json();
                 setUsers(usersData);
             }
-
             if (statsRes.ok) {
                 const statsData = await statsRes.json();
                 setStats(statsData);
@@ -72,13 +69,11 @@ export default function AdminPage() {
 
     const toggleAdmin = async (userId: number) => {
         if (!token) return;
-
         try {
-            const response = await fetch(`${API_BASE_URL} /api/admin / users / ${userId}/toggle-admin`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/toggle-admin`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` },
             });
-
             if (response.ok) {
                 fetchData();
             }
@@ -88,14 +83,13 @@ export default function AdminPage() {
     };
 
     const deleteUser = async (userId: number) => {
-        if (!token || !confirm("本当にこのユーザーを削除しますか？")) return;
-
+        if (!token) return;
+        if (!confirm(t("admin.confirmDelete"))) return;
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
-
             if (response.ok) {
                 fetchData();
             }
@@ -107,7 +101,7 @@ export default function AdminPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-                <p>Loading...</p>
+                <p>{t("common.loading")}</p>
             </div>
         );
     }
@@ -116,15 +110,15 @@ export default function AdminPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">管理者ダッシュボード</h1>
-                    <p className="text-slate-600">システム全体の管理と監視</p>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">{t("admin.title")}</h1>
+                    <p className="text-slate-600">{t("admin.subtitle")}</p>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">総ユーザー数</CardTitle>
+                            <CardTitle className="text-sm font-medium">{t("admin.totalUsers")}</CardTitle>
                             <Users className="h-4 w-4 text-emerald-600" />
                         </CardHeader>
                         <CardContent>
@@ -134,7 +128,7 @@ export default function AdminPage() {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">総プロジェクト数</CardTitle>
+                            <CardTitle className="text-sm font-medium">{t("admin.totalProjects")}</CardTitle>
                             <FolderKanban className="h-4 w-4 text-emerald-600" />
                         </CardHeader>
                         <CardContent>
@@ -144,7 +138,7 @@ export default function AdminPage() {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">管理者数</CardTitle>
+                            <CardTitle className="text-sm font-medium">{t("admin.totalAdmins")}</CardTitle>
                             <Shield className="h-4 w-4 text-emerald-600" />
                         </CardHeader>
                         <CardContent>
@@ -156,19 +150,19 @@ export default function AdminPage() {
                 {/* Users Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>ユーザー管理</CardTitle>
-                        <CardDescription>全ユーザーの一覧と管理</CardDescription>
+                        <CardTitle>{t("admin.userManagement")}</CardTitle>
+                        <CardDescription>{t("admin.userManagementDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="text-left p-4 font-medium">ID</th>
-                                        <th className="text-left p-4 font-medium">メール</th>
-                                        <th className="text-left p-4 font-medium">ユーザー名</th>
-                                        <th className="text-left p-4 font-medium">権限</th>
-                                        <th className="text-right p-4 font-medium">操作</th>
+                                        <th className="text-left p-4 font-medium">{t("admin.id")}</th>
+                                        <th className="text-left p-4 font-medium">{t("admin.email")}</th>
+                                        <th className="text-left p-4 font-medium">{t("admin.username")}</th>
+                                        <th className="text-left p-4 font-medium">{t("admin.role")}</th>
+                                        <th className="text-right p-4 font-medium">{t("admin.actions")}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,13 +173,9 @@ export default function AdminPage() {
                                             <td className="p-4">{u.username || "-"}</td>
                                             <td className="p-4">
                                                 {u.is_admin ? (
-                                                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold">
-                                                        管理者
-                                                    </span>
+                                                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold">{t("admin.admin")}</span>
                                                 ) : (
-                                                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">
-                                                        一般
-                                                    </span>
+                                                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">{t("admin.user")}</span>
                                                 )}
                                             </td>
                                             <td className="p-4 text-right space-x-2">
@@ -196,7 +186,7 @@ export default function AdminPage() {
                                                     disabled={u.id === user?.id}
                                                 >
                                                     <UserCog className="h-4 w-4 mr-1" />
-                                                    {u.is_admin ? "権限解除" : "管理者化"}
+                                                    {u.is_admin ? t("admin.revokeAdmin") : t("admin.makeAdmin")}
                                                 </Button>
                                                 <Button
                                                     size="sm"
@@ -205,7 +195,7 @@ export default function AdminPage() {
                                                     disabled={u.id === user?.id}
                                                 >
                                                     <Trash2 className="h-4 w-4 mr-1" />
-                                                    削除
+                                                    {t("admin.deleteUser")}
                                                 </Button>
                                             </td>
                                         </tr>
@@ -217,9 +207,7 @@ export default function AdminPage() {
                 </Card>
 
                 <div className="mt-8 text-center">
-                    <Button variant="outline" onClick={() => router.back()}>
-                        戻る
-                    </Button>
+                    <Button variant="outline" onClick={() => router.back()}>{t("common.back")}</Button>
                 </div>
             </div>
         </div>
