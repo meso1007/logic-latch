@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -15,17 +15,38 @@ export default function RoadmapPage() {
     const [stepScores, setStepScores] = useState<Record<number, any>>({});
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get("id");
     const { token } = useAuth();
 
     useEffect(() => {
         const fetchRoadmap = async () => {
             if (!token) {
-                setLoading(false); // Ensure loading is false if no token
+                setLoading(false);
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/projects/latest`, {
+                // Determine endpoint based on projectId presence
+                const endpoint = projectId
+                    ? `${API_BASE_URL}/api/projects/${projectId}` // We need to implement this or reuse latest logic? 
+                    // Actually, we don't have /api/projects/:id yet. We only have /api/projects/latest.
+                    // Wait, the plan said "Update RoadmapPage to check for a projectId query parameter".
+                    // But we didn't add GET /api/projects/:id in backend yet.
+                    // Let's use the existing /api/projects/latest for now if no ID, 
+                    // BUT we need GET /api/projects/:id for specific history items.
+                    // I missed adding GET /api/projects/:id in the backend plan step.
+                    // I should add it now.
+                    : `${API_BASE_URL}/api/projects/latest`;
+
+                // Wait, I can't call a non-existent endpoint. 
+                // I need to add GET /api/projects/:id to backend first.
+                // For now, let's assume I will add it next.
+
+                // Actually, I should pause this edit and add the backend endpoint first.
+                // But I can write the frontend code assuming the endpoint will exist.
+
+                const response = await fetch(endpoint, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (response.ok) {
@@ -42,13 +63,12 @@ export default function RoadmapPage() {
                     });
                     setStepScores(scores);
                 } else {
-                    // Handle cases where response is not ok, e.g., no roadmap found
                     setRoadmap([]);
                     setStepScores({});
                 }
             } catch (error) {
                 console.error("Failed to fetch roadmap:", error);
-                setRoadmap([]); // Set to empty array on error
+                setRoadmap([]);
                 setStepScores({});
             } finally {
                 setLoading(false);
@@ -58,9 +78,9 @@ export default function RoadmapPage() {
         if (token) {
             fetchRoadmap();
         } else {
-            setLoading(false); // If no token, stop loading
+            setLoading(false);
         }
-    }, [token]);
+    }, [token, projectId]);
 
     if (loading) {
         return (
@@ -81,8 +101,14 @@ export default function RoadmapPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
             <Card className="max-w-4xl mx-auto">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-2xl">学習ロードマップ</CardTitle>
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push(`/?edit_id=${projectId || ""}`)}
+                    >
+                        設定を編集して再生成
+                    </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {roadmap.map((step: any) => (

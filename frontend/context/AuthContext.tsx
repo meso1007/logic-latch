@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 interface User {
     id: number;
     email: string;
+    username?: string;
+    profile_image?: string;
 }
 
 interface AuthContextType {
@@ -13,10 +15,13 @@ interface AuthContextType {
     token: string | null;
     login: (token: string, user: User) => void;
     logout: () => void;
+    updateProfile: (username: string, profileImage: string) => Promise<void>;
     isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -52,8 +57,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/login");
     };
 
+    const updateProfile = async (username: string, profileImage: string) => {
+        if (!token) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/profile`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    username,
+                    profile_image: profileImage,
+                }),
+            });
+
+            if (response.ok) {
+                const updatedUser = await response.json();
+                setUser(updatedUser);
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            throw error;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, updateProfile, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

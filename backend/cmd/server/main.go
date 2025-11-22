@@ -60,6 +60,9 @@ type GenerateStepQuizRequest struct {
 type User struct {
 	ID           uint   `gorm:"primaryKey"`
 	Email        string `gorm:"uniqueIndex;size:255"`
+	Username     string `gorm:"size:100"`
+	ProfileImage string `gorm:"size:500"`
+	IsAdmin      bool   `gorm:"default:false"`
 	PasswordHash string
 }
 
@@ -115,8 +118,10 @@ type LoginRequest struct {
 type AuthResponse struct {
 	Token string `json:"token"`
 	User  struct {
-		ID    uint   `json:"id"`
-		Email string `json:"email"`
+		ID           uint   `json:"id"`
+		Email        string `json:"email"`
+		Username     string `json:"username"`
+		ProfileImage string `json:"profile_image"`
 	} `json:"user"`
 }
 
@@ -218,9 +223,16 @@ func main() {
 		return c.JSON(http.StatusCreated, AuthResponse{
 			Token: t,
 			User: struct {
-				ID    uint   `json:"id"`
-				Email string `json:"email"`
-			}{ID: user.ID, Email: user.Email},
+				ID           uint   `json:"id"`
+				Email        string `json:"email"`
+				Username     string `json:"username"`
+				ProfileImage string `json:"profile_image"`
+			}{
+				ID:           user.ID,
+				Email:        user.Email,
+				Username:     user.Username,
+				ProfileImage: user.ProfileImage,
+			},
 		})
 	})
 
@@ -255,11 +267,57 @@ func main() {
 		return c.JSON(http.StatusOK, AuthResponse{
 			Token: t,
 			User: struct {
-				ID    uint   `json:"id"`
-				Email string `json:"email"`
-			}{ID: user.ID, Email: user.Email},
+				ID           uint   `json:"id"`
+				Email        string `json:"email"`
+				Username     string `json:"username"`
+				ProfileImage string `json:"profile_image"`
+			}{
+				ID:           user.ID,
+				Email:        user.Email,
+				Username:     user.Username,
+				ProfileImage: user.ProfileImage,
+			},
 		})
 	})
+
+	// Update user profile endpoint (will be protected by middleware below)
+	updateProfileHandler := func(c echo.Context) error {
+		userID := c.Get("userID").(uint)
+
+		type UpdateProfileRequest struct {
+			Username     string `json:"username"`
+			ProfileImage string `json:"profile_image"`
+		}
+
+		req := new(UpdateProfileRequest)
+		if err := c.Bind(req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+		}
+
+		var user User
+		if result := db.First(&user, userID); result.Error != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		}
+
+		// Update fields
+		if req.Username != "" {
+			user.Username = req.Username
+		}
+		if req.ProfileImage != "" {
+			user.ProfileImage = req.ProfileImage
+		}
+
+		if err := db.Save(&user).Error; err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update profile"})
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"id":            user.ID,
+			"email":         user.Email,
+			"username":      user.Username,
+			"profile_image": user.ProfileImage,
+		})
+	}
 
 	// Middleware for protected routes
 	authMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -359,6 +417,9 @@ func main() {
 
 		return c.Blob(http.StatusOK, "application/json", []byte(generatedText))
 	})
+
+	// Profile update endpoint
+	e.PUT("/api/profile", authMiddleware(updateProfileHandler))
 
 	// ロードマップ生成エンドポイント (要認証)
 	e.POST("/api/generate-roadmap", authMiddleware(func(c echo.Context) error {
@@ -669,12 +730,113 @@ func main() {
 
 	// --- New Data Access Endpoints ---
 
+	// Get all projects for user (Sidebar list)
+	e.GET("/api/projects", authMiddleware(func(c echo.Context) error {
+		userID := c.Get("userID").(uint)
+		var projects []Project
+		if err := db.Where("user_id = ?", userID).Order("created_at desc").Find(&projects).Error; err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch projects"})
+		}
+
+		type ProjectSummary struct {
+			ID        uint      `json:"id"`
+			Goal      string    `json:"goal"`
+			CreatedAt time.Time `json:"created_at"`
+		}
+
+		var summaries []ProjectSummary
+		for _, p := range projects {
+			summaries = append(summaries, ProjectSummary{
+				ID:        p.ID,
+				Goal:      p.Goal,
+				CreatedAt: p.CreatedAt,
+			})
+		}
+
+		return c.JSON(http.StatusOK, summaries)
+	}))
+
 	// Get latest project for user
 	e.GET("/api/projects/latest", authMiddleware(func(c echo.Context) error {
 		userID := c.Get("userID").(uint)
 		var project Project
 		if err := db.Where("user_id = ?", userID).Order("created_at desc").Preload("Steps").First(&project).Error; err != nil {
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "No project found"})
+		}
+
+		// Also load scores for the steps
+		var scores []Score
+		stepIDs := make([]uint, len(project.Steps))
+		for i, s := range project.Steps {
+			stepIDs[i] = s.ID
+		}
+		db.Where("step_id IN ?", stepIDs).Find(&scores)
+
+		// Map scores to step IDs
+		scoreMap := make(map[uint]Score)
+		for _, s := range scores {
+			scoreMap[s.StepID] = s
+		}
+
+		// Construct response
+		type StepResponse struct {
+			Step        int    `json:"step"`
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			IsCompleted bool   `json:"is_completed"`
+			Score       *struct {
+				Score      int `json:"score"`
+				Total      int `json:"total"`
+				Percentage int `json:"percentage"`
+			} `json:"score,omitempty"`
+		}
+
+		var stepsResp []StepResponse
+		for _, s := range project.Steps {
+			var scoreResp *struct {
+				Score      int `json:"score"`
+				Total      int `json:"total"`
+				Percentage int `json:"percentage"`
+			}
+			isCompleted := false
+			if sc, ok := scoreMap[s.ID]; ok {
+				isCompleted = true
+				scoreResp = &struct {
+					Score      int `json:"score"`
+					Total      int `json:"total"`
+					Percentage int `json:"percentage"`
+				}{
+					Score:      sc.Score,
+					Total:      sc.Total,
+					Percentage: sc.Percentage,
+				}
+			}
+			stepsResp = append(stepsResp, StepResponse{
+				Step:        s.StepNumber,
+				Title:       s.Title,
+				Description: s.Description,
+				IsCompleted: isCompleted,
+				Score:       scoreResp,
+			})
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"id":      project.ID,
+			"goal":    project.Goal,
+			"stack":   project.Stack,
+			"level":   project.Level,
+			"roadmap": stepsResp,
+		})
+	}))
+
+	// Get specific project by ID
+	e.GET("/api/projects/:id", authMiddleware(func(c echo.Context) error {
+		userID := c.Get("userID").(uint)
+		projectID := c.Param("id")
+
+		var project Project
+		if err := db.Where("id = ? AND user_id = ?", projectID, userID).Preload("Steps").First(&project).Error; err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "Project not found"})
 		}
 
 		// Also load scores for the steps

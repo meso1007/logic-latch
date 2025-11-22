@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { RoadmapResponse, Step } from "@/src/roadmap";
 import { Button } from "@/components/ui/button";
@@ -32,22 +32,59 @@ export default function Home() {
   const [stack, setStack] = useState("");
   const [level, setLevel] = useState("beginner");
   const [proposedPlan, setProposedPlan] = useState<ProposeResponse | null>(null);
-  const [editingPlan, setEditingPlan] = useState<ProposeResponse | null>(null);
-  const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
+  const [editingPlan, setEditingPlan] = useState<ProposeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { token, user, isLoading: authLoading } = useAuth();
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { token } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!token) {
       router.push("/login");
+      return;
     }
-  }, [authLoading, user, router]);
 
-  useEffect(() => {
-    const fetchLatestProject = async () => {
-      if (!token) return;
+    const fetchProject = async () => {
+      const isNew = searchParams.get("new") === "true";
+      const editId = searchParams.get("edit_id");
+
+      if (isNew) {
+        // Clear form and roadmap
+        setGoal("");
+        setStack("");
+        setLevel("beginner");
+        setRoadmap(null);
+        setProposedPlan(null); // Clear proposed plan as well
+        setEditingPlan(null);
+        return;
+      }
+
+      if (editId) {
+        // Fetch specific project to edit
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/projects/${editId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setGoal(data.goal);
+            setStack(data.stack);
+            setLevel(data.level);
+            // Don't set roadmap, so user sees the form to regenerate
+            setRoadmap(null);
+            setProposedPlan(null); // Clear proposed plan
+            setEditingPlan(null); // Clear editing plan
+          }
+        } catch (error) {
+          console.error("Failed to fetch project for editing:", error);
+        }
+        return;
+      }
+
+      // Default: fetch latest project
       try {
         const response = await fetch(`${API_BASE_URL}/api/projects/latest`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -55,20 +92,20 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           setRoadmap(data);
-          // Also set initial form values if needed
+          // Also set form values just in case they want to edit latest
           setGoal(data.goal);
           setStack(data.stack);
           setLevel(data.level);
+          setProposedPlan(null); // Clear proposed plan
+          setEditingPlan(null); // Clear editing plan
         }
-      } catch (err) {
-        console.error("Failed to fetch latest project", err);
+      } catch (error) {
+        console.error("Failed to fetch latest project:", error);
       }
     };
 
-    if (token) {
-      fetchLatestProject();
-    }
-  }, [token]);
+    fetchProject();
+  }, [token, searchParams, router]);
 
   const handlePropose = async () => {
     if (!goal.trim()) {
