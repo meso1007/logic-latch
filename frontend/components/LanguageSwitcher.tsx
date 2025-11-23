@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
                     <Globe className="h-5 w-5" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-emerald-950 border-emerald-800 text-emerald-100">
+            <DropdownMenuContent align="end" className="bg-emerald-950 border-emerald-800 text-emerald-100 z-[101]">
                 <DropdownMenuItem
                     onClick={() => handleLanguageChange("ja")}
                     className={`cursor-pointer focus:bg-emerald-800 focus:text-white ${currentLocale === "ja" ? "bg-emerald-800" : ""

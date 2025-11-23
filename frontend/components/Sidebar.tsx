@@ -78,7 +78,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                "flex flex-col h-screen text-slate-100 border-r transition-all duration-300 ease-in-out",
+                "flex flex-col h-screen text-slate-100 border-r transition-all duration-300 ease-in-out relative z-[100]",
                 "bg-gradient-to-b from-emerald-950 to-emerald-900 border-emerald-800",
                 isCollapsed ? "w-16" : "w-64"
             )}
@@ -187,7 +187,7 @@ export function Sidebar() {
                     <DropdownMenuContent
                         side="top"
                         align="end"
-                        className="w-56 bg-emerald-950 border-emerald-800 text-emerald-100"
+                        className="w-56 bg-emerald-950 border-emerald-800 text-emerald-100 z-[101]"
                     >
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
