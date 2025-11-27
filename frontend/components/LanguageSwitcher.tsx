@@ -28,7 +28,7 @@ export function LanguageSwitcher({ variant = "sidebar", className }: LanguageSwi
     const isSidebar = variant === "sidebar";
 
     const buttonClass = isSidebar
-        ? "text-emerald-200 hover:text-white hover:bg-emerald-800"
+        ? "text-slate-600  hover:text-white hover:bg-emerald-800"
         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100";
 
     const contentClass = isSidebar

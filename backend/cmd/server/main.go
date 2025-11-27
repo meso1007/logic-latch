@@ -112,6 +112,7 @@ type Score struct {
 
 type SignupRequest struct {
 	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
@@ -206,6 +207,7 @@ func main() {
 
 		user := User{
 			Email:        req.Email,
+			Username:     req.Username,
 			PasswordHash: string(hashedPassword),
 		}
 

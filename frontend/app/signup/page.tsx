@@ -125,7 +125,9 @@ export default function SignupPage() {
 
     // Form State
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const { login } = useAuth();
     const router = useRouter();
@@ -136,11 +138,24 @@ export default function SignupPage() {
         setLoading(true);
         setError(null);
 
+        // Validation
+        if (!username.trim()) {
+            setError(t("usernameRequired") || "Username is required");
+            setLoading(false);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError(t("passwordMismatch") || "Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, username, password }),
             });
 
             if (!response.ok) {
@@ -162,7 +177,7 @@ export default function SignupPage() {
         <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col relative overflow-hidden">
             <NavHeader />
 
-            <div className="flex-1 flex items-center justify-center p-4 pt-20 md:p-8 md:pt-24 lg:p-12">
+            <div className="flex-1 flex items-center justify-center p-4 pt-18 md:p-8 md:pt-24 lg:p-12 lg:pt-24">
                 <div className="w-full max-w-[1600px] grid lg:grid-cols-2 gap-8 lg:gap-20 items-stretch">
 
                     {/* Left Column: Image Card */}
@@ -224,7 +239,7 @@ export default function SignupPage() {
                                     onClick={() => router.push("/")}
                                     whileHover={{ scale: 1.1, rotate: -5 }}
                                     whileTap={{ scale: 0.9 }}
-                                    className="w-10 h-10 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                                    className="w-10 h-10 rounded-full bg-[#10b981] flex items-center justify-center text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] z-70"
                                 >
                                     <ArrowLeft size={20} strokeWidth={3} />
                                 </motion.button>
@@ -261,6 +276,16 @@ export default function SignupPage() {
                                 />
 
                                 <InputField
+                                    label={t("username") || "Username"}
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    placeholder={t("usernamePlaceholder") || "Enter your username"}
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+
+                                <InputField
                                     label={t("password")}
                                     id="password"
                                     name="password"
@@ -268,6 +293,16 @@ export default function SignupPage() {
                                     placeholder={t("passwordSignupPlaceholder")}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                />
+
+                                <InputField
+                                    label={t("confirmPassword") || "Confirm Password"}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type="password"
+                                    placeholder={t("confirmPasswordPlaceholder") || "Re-enter your password"}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
 
                                 {error && (

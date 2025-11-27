@@ -28,7 +28,7 @@ export function Header() {
                     </Button>
                 </Link>
                 <Link href="/signup">
-                    <Button size="default" className="bg-primary hover:bg-primary/90 text-primary-foreground hover:text-primary-foreground rounded-xl px-4 cursor-pointer">
+                    <Button size="default" className="bg-primary  hover:bg-primary/90 text-primary-foreground hover:text-primary-foreground rounded-xl px-4 cursor-pointer">
                         {t("common.signup")}
                     </Button>
                 </Link>

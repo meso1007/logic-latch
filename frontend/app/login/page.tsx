@@ -78,13 +78,7 @@ const NavHeader = () => {
 
             <div className="flex items-center gap-4">
                 <LanguageSwitcher />
-                <motion.a
-                    href="/signup"
-                    whileHover={{ scale: 1.05, color: "#10b981" }}
-                    className="font-bold text-slate-900 tracking-wide transition-colors text-sm"
-                >
-                    {t("signup")}
-                </motion.a>
+
             </div>
         </motion.nav>
     );
