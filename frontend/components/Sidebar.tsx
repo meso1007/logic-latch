@@ -97,7 +97,7 @@ export function Sidebar() {
                     <Button
                         onClick={() => router.push("/?new=true")}
                         className={cn(
-                            "w-full bg-emerald-800 hover:bg-emerald-700 text-white border border-emerald-700 transition-all",
+                            "w-full bg-primary hover:bg-primary/90 text-primary-foreground border border-primary/20 transition-all shadow-lg shadow-primary/20",
                             isCollapsed ? "justify-center px-0" : "justify-start gap-2"
                         )}
                         variant="outline"
@@ -133,8 +133,8 @@ export function Sidebar() {
                                 className={cn(
                                     "group relative flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
                                     pathname === `/roadmap` && window.location.search.includes(`id=${project.id}`)
-                                        ? "bg-emerald-700 text-white"
-                                        : "text-emerald-100 hover:bg-emerald-800",
+                                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                                        : "text-emerald-100 hover:bg-emerald-800/50",
                                     isCollapsed && "justify-center px-2"
                                 )}
                             >

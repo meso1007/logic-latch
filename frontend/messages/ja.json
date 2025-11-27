@@ -9,6 +9,8 @@
         "search": "検索",
         "newProject": "新規プロジェクト",
         "logout": "ログアウト",
+        "login": "ログイン",
+        "signup": "無料で登録",
         "deleteConfirm": "本当にこのプロジェクトを削除しますか？",
         "deleteConfirmTitle": "プロジェクトの削除",
         "deleteConfirmDescription": "本当にこのプロジェクトを削除しますか？この操作は取り消せません。"
@@ -81,7 +83,7 @@
         "subtitle": "学習の旅に最適なプランを選びましょう",
         "plans": {
             "free": {
-                "name": "Reverse Learn",
+                "name": "LogicLatch AI",
                 "price": "¥0",
                 "period": "/ 月",
                 "description": "個人の学習や探索に最適です。",
@@ -94,7 +96,7 @@
                 }
             },
             "pro": {
-                "name": "Reverse Learn Advanced",
+                "name": "LogicLatch AI Advanced",
                 "price": "¥980",
                 "period": "/ 月",
                 "description": "より早くスキルを習得したい本気の学習者向け。",
@@ -113,7 +115,7 @@
     },
     "paywall": {
         "title": "複雑なロジックをアンロック",
-        "description": "Step 4以降は複雑なロジックとセキュリティチェックが含まれます。Reverse Learn Advancedにアップグレードして、コードの安全性とスケーラビリティを確保しましょう。",
+        "description": "ステップ4以降は複雑なロジックとセキュリティチェックが含まれます。LogicLatch AI Advancedにアップグレードして、コードの安全性とスケーラビリティを確保しましょう。",
         "button": "Proにアップグレード"
     },
     "help": {
@@ -173,7 +175,7 @@
             "viewAll": "すべて見る",
             "quickStart": {
                 "title": "クイックスタート",
-                "desc": "5分で始める Reverse Learn"
+                "desc": "LogicLatch AIを5分で始める"
             },
             "projects": {
                 "title": "プロジェクト",
@@ -195,8 +197,8 @@
             "social": "ソーシャル"
         },
         "faqItems": {
-            "q1": "Reverse Learnとは何ですか？",
-            "a1": "Reverse Learnは、AIを活用してあなたの学習目標に合わせたカスタマイズされた学習ロードマップを生成するプラットフォームです。プロジェクトベースの学習を通じて、効率的にスキルを習得できます。",
+            "q1": "LogicLatch AIとは何ですか？",
+            "a1": "LogicLatch AIは、AIを活用してあなたの学習目標に合わせたカスタマイズされた学習ロードマップを生成するプラットフォームです。プロジェクトベースの学習を通じて、効率的にスキルを習得できます。",
             "q2": "どのように始めればいいですか？",
             "a2": "まずアカウントを作成し、ホームページで「作りたいもの」を入力してください。AIが最適な技術スタックと学習ステップを提案します。その後、各ステップのクイズに挑戦しながら学習を進めていきます。",
             "q3": "プロジェクトの作成方法は？",
@@ -284,7 +286,7 @@
             "p3Desc": "プロジェクトに必要なスキルではなく、断片的な構文ばかり学んでしまう。"
         },
         "solution": {
-            "title": "Reverse Learn メソッド",
+            "title": "なぜLogicLatch AIなのか？",
             "subtitle": "私たちは学習の順序を逆転させます。あなたが目的地を決め、私たちが地図を提供します。",
             "s1Title": "ゴールファースト",
             "s1Desc": "「何を作りたいか」から始めます。チャットアプリ？SaaS？そこがすべての出発点です。",
@@ -354,5 +356,31 @@
         "accuracy": "正答率",
         "nextStep": "次のステップへ進む (Step {step})",
         "allCompleted": "全ステップ完了！ロードマップに戻る"
+    },
+    "auth": {
+        "loginTitle": "ログイン",
+        "loginSubtitle": "学習の旅を続け、進捗を記録しましょう。",
+        "signupTitle": "アカウント作成",
+        "signupSubtitle": "サインアップして、パーソナライズされた学習ロードマップを作成しましょう。",
+        "email": "メールアドレス",
+        "emailPlaceholder": "メールアドレスを入力",
+        "password": "パスワード",
+        "passwordPlaceholder": "パスワードを入力",
+        "passwordSignupPlaceholder": "パスワードを作成（6文字以上）",
+        "loginButton": "ログイン",
+        "loginLoading": "ログイン中...",
+        "signupButton": "登録する",
+        "signupLoading": "アカウント作成中...",
+        "noAccount": "アカウントをお持ちでないですか？",
+        "hasAccount": "すでにアカウントをお持ちですか？",
+        "welcomeBack": "おかえりなさい",
+        "getStarted": "始めましょう",
+        "masterLogic": "ロジックを極め、",
+        "buildFuture": "未来を創る。",
+        "startJourney": "旅を",
+        "journey": "始めよう。",
+        "loginHeroText": "リバースラーニングを通じてプログラミングの概念を習得するための、あなただけのAIメンター。",
+        "signupHeroText": "AIを活用したリバースラーニングで複雑な概念を習得する数千人の開発者に加わりましょう。",
+        "copyright": "Copyright 2025 LogicLatch AI. All rights reserved."
     }
 }

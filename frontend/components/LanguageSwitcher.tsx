@@ -8,8 +8,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+    variant?: "sidebar" | "header";
+    className?: string;
+}
+
+export function LanguageSwitcher({ variant = "sidebar", className }: LanguageSwitcherProps) {
     const handleLanguageChange = (locale: string) => {
         localStorage.setItem("locale", locale);
         window.location.reload();
@@ -19,25 +25,41 @@ export function LanguageSwitcher() {
         ? localStorage.getItem("locale") || "ja"
         : "ja";
 
+    const isSidebar = variant === "sidebar";
+
+    const buttonClass = isSidebar
+        ? "text-emerald-200 hover:text-white hover:bg-emerald-800"
+        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+
+    const contentClass = isSidebar
+        ? "bg-emerald-950 border-emerald-800 text-emerald-100"
+        : "bg-white border-slate-200 text-slate-900";
+
+    const itemClass = (locale: string) => {
+        const isActive = currentLocale === locale;
+        if (isSidebar) {
+            return `cursor-pointer focus:bg-emerald-800 focus:text-white ${isActive ? "bg-emerald-800" : ""}`;
+        }
+        return `cursor-pointer focus:bg-slate-100 focus:text-slate-900 ${isActive ? "bg-slate-100" : ""}`;
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-emerald-200 hover:text-white hover:bg-emerald-800">
+                <Button variant="ghost" size="icon" className={cn(buttonClass, className)}>
                     <Globe className="h-5 w-5" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-emerald-950 border-emerald-800 text-emerald-100 z-[101]">
+            <DropdownMenuContent align="end" className={`${contentClass} z-[101]`}>
                 <DropdownMenuItem
                     onClick={() => handleLanguageChange("ja")}
-                    className={`cursor-pointer focus:bg-emerald-800 focus:text-white ${currentLocale === "ja" ? "bg-emerald-800" : ""
-                        }`}
+                    className={itemClass("ja")}
                 >
                     🇯JP
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => handleLanguageChange("en")}
-                    className={`cursor-pointer focus:bg-emerald-800 focus:text-white ${currentLocale === "en" ? "bg-emerald-800" : ""
-                        }`}
+                    className={itemClass("en")}
                 >
                     🇺EN
                 </DropdownMenuItem>

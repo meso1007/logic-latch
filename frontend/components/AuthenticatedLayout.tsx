@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "@/components/Sidebar";
+import { Header } from "@/components/Header";
 import { usePathname } from "next/navigation";
 
 export function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,21 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
 
-    if (!user || isPublicPage) {
+    if (!user) {
+        if (isPublicPage) {
+            return <>{children}</>;
+        }
+        return (
+            <div className="min-h-screen bg-slate-50 pt-16">
+                <Header />
+                <main className="h-[calc(100vh-4rem)] overflow-y-auto">
+                    {children}
+                </main>
+            </div>
+        );
+    }
+
+    if (isPublicPage) {
         return <>{children}</>;
     }
 

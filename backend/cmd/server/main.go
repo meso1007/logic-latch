@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -100,11 +101,11 @@ type Quiz struct {
 }
 
 type Score struct {
-	ID         uint `gorm:"primaryKey"`
-	StepID     uint `gorm:"uniqueIndex"`
-	Score      int
-	Total      int
-	Percentage int
+	ID         uint `gorm:"primaryKey" json:"id"`
+	StepID     uint `gorm:"uniqueIndex" json:"step_id"`
+	Score      int  `json:"score"`
+	Total      int  `json:"total"`
+	Percentage int  `json:"percentage"`
 }
 
 // --- Auth Structs ---
@@ -333,15 +334,29 @@ func main() {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
+				log.Println("Auth error: Missing authorization header")
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Missing authorization header"})
 			}
 
+			if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
+				log.Printf("Auth error: Invalid header format. Header: %s", authHeader)
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid authorization header"})
+			}
+
 			tokenString := authHeader[len("Bearer "):]
+			tokenString = strings.TrimSpace(tokenString)
+
 			token, err := jwt.ParseWithClaims(tokenString, &JWTCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				return jwtSecret, nil
 			})
 
-			if err != nil || !token.Valid {
+			if err != nil {
+				log.Printf("Auth error: Token parse error: %v", err)
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
+			}
+
+			if !token.Valid {
+				log.Println("Auth error: Token is invalid")
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
 			}
 
@@ -1198,307 +1213,6 @@ Create 10 multiple-choice quizzes to check understanding for the following learn
 	}))
 
 	// Get system stats (admin only)
-	// --- Project Endpoints ---
-
-	// Get all projects for user
-	e.GET("/api/projects", authMiddleware(func(c echo.Context) error {
-		userID := c.Get("userID").(uint)
-		var projects []Project
-		if err := db.Where("user_id = ?", userID).Order("created_at desc").Find(&projects).Error; err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch projects"})
-		}
-
-		// Return simplified list
-		type ProjectSummary struct {
-			ID        uint      `json:"id"`
-			Goal      string    `json:"goal"`
-			CreatedAt time.Time `json:"created_at"`
-		}
-
-		var summaries []ProjectSummary
-		for _, p := range projects {
-			summaries = append(summaries, ProjectSummary{
-				ID:        p.ID,
-				Goal:      p.Goal,
-				CreatedAt: p.CreatedAt,
-			})
-		}
-
-		return c.JSON(http.StatusOK, summaries)
-	}))
-
-	// Get latest project
-	e.GET("/api/projects/latest", authMiddleware(func(c echo.Context) error {
-		userID := c.Get("userID").(uint)
-		var project Project
-		if err := db.Where("user_id = ?", userID).Preload("Steps").Preload("Steps.Score").Order("created_at desc").First(&project).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "No projects found"})
-		}
-
-		// Format response to match RoadmapResponse
-		type RoadmapResponse struct {
-			ID         uint   `json:"id"`
-			Goal       string `json:"goal"`
-			Stack      string `json:"stack"`
-			Level      string `json:"level"`
-			Complexity string `json:"complexity"` // Not stored in DB currently, maybe add or ignore
-			Roadmap    []struct {
-				Step        int    `json:"step"`
-				Title       string `json:"title"`
-				Description string `json:"description"`
-				Score       *Score `json:"score,omitempty"`
-				Quizzes     []struct {
-					Question    string   `json:"question"`
-					Options     []string `json:"options"`
-					AnswerIndex int      `json:"answer_index"`
-					Explanation string   `json:"explanation"`
-				} `json:"quizzes"`
-			} `json:"roadmap"`
-		}
-
-		resp := RoadmapResponse{
-			ID:    project.ID,
-			Goal:  project.Goal,
-			Stack: project.Stack,
-			Level: project.Level,
-		}
-
-		for _, s := range project.Steps {
-			// Fetch quizzes for each step if needed, or just basic info
-			// For roadmap view, we might not need quizzes, but let's include them for completeness or lazy load
-			var quizzes []Quiz
-			db.Where("step_id = ?", s.ID).Find(&quizzes)
-
-			var quizResps []struct {
-				Question    string   `json:"question"`
-				Options     []string `json:"options"`
-				AnswerIndex int      `json:"answer_index"`
-				Explanation string   `json:"explanation"`
-			}
-
-			for _, q := range quizzes {
-				var options []string
-				json.Unmarshal(q.Options, &options)
-				quizResps = append(quizResps, struct {
-					Question    string   `json:"question"`
-					Options     []string `json:"options"`
-					AnswerIndex int      `json:"answer_index"`
-					Explanation string   `json:"explanation"`
-				}{
-					Question:    q.Question,
-					Options:     options,
-					AnswerIndex: q.AnswerIndex,
-					Explanation: q.Explanation,
-				})
-			}
-
-			resp.Roadmap = append(resp.Roadmap, struct {
-				Step        int    `json:"step"`
-				Title       string `json:"title"`
-				Description string `json:"description"`
-				Score       *Score `json:"score,omitempty"`
-				Quizzes     []struct {
-					Question    string   `json:"question"`
-					Options     []string `json:"options"`
-					AnswerIndex int      `json:"answer_index"`
-					Explanation string   `json:"explanation"`
-				} `json:"quizzes"`
-			}{
-				Step:        s.StepNumber,
-				Title:       s.Title,
-				Description: s.Description,
-				Score:       s.Score,
-				Quizzes:     quizResps,
-			})
-		}
-
-		return c.JSON(http.StatusOK, resp)
-	}))
-
-	// Get specific project
-	e.GET("/api/projects/:id", authMiddleware(func(c echo.Context) error {
-		userID := c.Get("userID").(uint)
-		projectID := c.Param("id")
-
-		var project Project
-		if err := db.Where("id = ? AND user_id = ?", projectID, userID).Preload("Steps").Preload("Steps.Score").First(&project).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Project not found"})
-		}
-
-		// Reuse response logic (should refactor ideally)
-		// Format response to match RoadmapResponse
-		type RoadmapResponse struct {
-			ID      uint   `json:"id"`
-			Goal    string `json:"goal"`
-			Stack   string `json:"stack"`
-			Level   string `json:"level"`
-			Roadmap []struct {
-				Step        int    `json:"step"`
-				Title       string `json:"title"`
-				Description string `json:"description"`
-				Score       *Score `json:"score,omitempty"`
-			} `json:"roadmap"`
-		}
-
-		resp := RoadmapResponse{
-			ID:    project.ID,
-			Goal:  project.Goal,
-			Stack: project.Stack,
-			Level: project.Level,
-		}
-
-		for _, s := range project.Steps {
-			resp.Roadmap = append(resp.Roadmap, struct {
-				Step        int    `json:"step"`
-				Title       string `json:"title"`
-				Description string `json:"description"`
-				Score       *Score `json:"score,omitempty"`
-			}{
-				Step:        s.StepNumber,
-				Title:       s.Title,
-				Description: s.Description,
-				Score:       s.Score,
-			})
-		}
-
-		return c.JSON(http.StatusOK, resp)
-	}))
-
-	// Get specific step details
-	e.GET("/api/projects/:id/steps/:step_number", authMiddleware(func(c echo.Context) error {
-		userID := c.Get("userID").(uint)
-		projectID := c.Param("id")
-		stepNumber := c.Param("step_number")
-
-		var project Project
-		if err := db.Where("id = ? AND user_id = ?", projectID, userID).First(&project).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Project not found"})
-		}
-
-		var step Step
-		if err := db.Where("project_id = ? AND step_number = ?", project.ID, stepNumber).Preload("Quizzes").First(&step).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Step not found"})
-		}
-
-		type StepResponse struct {
-			Title       string `json:"title"`
-			Description string `json:"description"`
-			Quizzes     []struct {
-				Question    string   `json:"question"`
-				Options     []string `json:"options"`
-				AnswerIndex int      `json:"answer_index"`
-				Explanation string   `json:"explanation"`
-			} `json:"quizzes"`
-		}
-
-		var quizzes []struct {
-			Question    string   `json:"question"`
-			Options     []string `json:"options"`
-			AnswerIndex int      `json:"answer_index"`
-			Explanation string   `json:"explanation"`
-		}
-
-		for _, q := range step.Quizzes {
-			var options []string
-			json.Unmarshal(q.Options, &options)
-			quizzes = append(quizzes, struct {
-				Question    string   `json:"question"`
-				Options     []string `json:"options"`
-				AnswerIndex int      `json:"answer_index"`
-				Explanation string   `json:"explanation"`
-			}{
-				Question:    q.Question,
-				Options:     options,
-				AnswerIndex: q.AnswerIndex,
-				Explanation: q.Explanation,
-			})
-		}
-
-		return c.JSON(http.StatusOK, StepResponse{
-			Title:       step.Title,
-			Description: step.Description,
-			Quizzes:     quizzes,
-		})
-	}))
-
-	// Save score
-	e.POST("/api/projects/:id/steps/:step_number/score", authMiddleware(func(c echo.Context) error {
-		userID := c.Get("userID").(uint)
-		projectID := c.Param("id")
-		stepNumber := c.Param("step_number")
-
-		type ScoreRequest struct {
-			Score      int `json:"score"`
-			Total      int `json:"total"`
-			Percentage int `json:"percentage"`
-		}
-
-		req := new(ScoreRequest)
-		if err := c.Bind(req); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
-		}
-
-		var project Project
-		if err := db.Where("id = ? AND user_id = ?", projectID, userID).First(&project).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Project not found"})
-		}
-
-		var step Step
-		if err := db.Where("project_id = ? AND step_number = ?", project.ID, stepNumber).First(&step).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Step not found"})
-		}
-
-		// Update or create score
-		var score Score
-		if err := db.Where("step_id = ?", step.ID).First(&score).Error; err != nil {
-			score = Score{
-				StepID:     step.ID,
-				Score:      req.Score,
-				Total:      req.Total,
-				Percentage: req.Percentage,
-			}
-			db.Create(&score)
-		} else {
-			score.Score = req.Score
-			score.Total = req.Total
-			score.Percentage = req.Percentage
-			db.Save(&score)
-		}
-
-		return c.JSON(http.StatusOK, map[string]string{"message": "Score saved"})
-	}))
-
-	// --- Admin Endpoints ---
-
-	// List all users (admin only)
-	e.GET("/api/admin/users", adminMiddleware(func(c echo.Context) error {
-		var users []User
-		if err := db.Find(&users).Error; err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch users"})
-		}
-
-		type UserResponse struct {
-			ID           uint   `json:"id"`
-			Email        string `json:"email"`
-			Username     string `json:"username"`
-			ProfileImage string `json:"profile_image"`
-			IsAdmin      bool   `json:"is_admin"`
-		}
-
-		var userResps []UserResponse
-		for _, u := range users {
-			userResps = append(userResps, UserResponse{
-				ID:           u.ID,
-				Email:        u.Email,
-				Username:     u.Username,
-				ProfileImage: u.ProfileImage,
-				IsAdmin:      u.IsAdmin,
-			})
-		}
-
-		return c.JSON(http.StatusOK, userResps)
-	}))
-
 	e.GET("/api/admin/stats", adminMiddleware(func(c echo.Context) error {
 		var userCount int64
 		var projectCount int64

@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reverse Learn",
+  title: "LogicLatch AI",
   description: "AI-powered learning roadmap generator",
 };
 

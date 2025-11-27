@@ -41,7 +41,7 @@ export default function Home() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const { fetchProjects } = useProjects();
   const { t, locale } = useTranslations();
 
@@ -90,8 +90,12 @@ export default function Home() {
         // Fetch specific project to edit
         try {
           const response = await fetch(`${API_BASE_URL}/api/projects/${editId}`, {
-            headers: { Authorization: `Bearer ${token} ` },
+            headers: { Authorization: `Bearer ${token}` },
           });
+          if (response.status === 401) {
+            logout();
+            return;
+          }
           if (response.ok) {
             const data = await response.json();
             setGoal(data.goal);
@@ -111,8 +115,19 @@ export default function Home() {
       // Default: fetch latest project
       try {
         const response = await fetch(`${API_BASE_URL}/api/projects/latest?locale=${locale}`, {
-          headers: { Authorization: `Bearer ${token} ` },
+          headers: { Authorization: `Bearer ${token}` },
         });
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+        if (response.status === 404) {
+          // No latest project found, which is fine for new users
+          setRoadmap(null);
+          setProposedPlan(null);
+          setEditingPlan(null);
+          return;
+        }
         if (response.ok) {
           const data = await response.json();
           setRoadmap(data);
@@ -194,7 +209,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token} `,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           goal,
@@ -204,6 +219,11 @@ export default function Home() {
           locale,
         }),
       });
+
+      if (response.status === 401) {
+        logout();
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(t('Home.errorMessage'));
@@ -409,7 +429,7 @@ export default function Home() {
                 <div className="space-y-3">
                   {editingPlan.steps.map((step) => (
                     <div key={step.step} className="flex items-start gap-2">
-                      <span className="bg-slate-900 text-white text-xs font-bold px-2 py-1.5 rounded mt-1 min-w-[3rem] text-center">
+                      <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1.5 rounded mt-1 min-w-[3rem] text-center">
                         Step {step.step}
                       </span>
                       <Input
@@ -447,7 +467,7 @@ export default function Home() {
                   <Button
                     onClick={handleGenerate}
                     disabled={loading}
-                    className="flex-1 bg-slate-900 hover:bg-slate-800"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     {loading ? t('Home.loading') : t('Home.generateButton')}
                   </Button>
@@ -490,11 +510,11 @@ export default function Home() {
                       return (
                         <div
                           key={index}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-white rounded-full text-sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-sm"
                         >
                           <span className="font-semibold">{techName}</span>
                           {usage && (
-                            <span className="text-slate-300">({usage})</span>
+                            <span className="text-primary-foreground/80">({usage})</span>
                           )}
                         </div>
                       );
@@ -519,7 +539,7 @@ export default function Home() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <span className="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded">
+                            <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded">
                               Step {step.step}
                             </span>
                             <h3 className="font-semibold text-lg">{step.title}</h3>
@@ -532,8 +552,8 @@ export default function Home() {
                           </div>
                         </div>
                         <Button
-                          onClick={() => router.push(`/quiz/${step.step}`)}
-                          className="bg-slate-900 hover:bg-slate-800 whitespace-nowrap"
+                          onClick={() => router.push(`/quiz/${step.step}?projectId=${roadmap.id}`)}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground whitespace-nowrap"
                         >
                           {t('Home.startQuiz')}
                         </Button>

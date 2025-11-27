@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "@/hooks/useTranslations";
 import { Quiz } from "@/src/roadmap";
@@ -14,7 +14,9 @@ import { CheckCircle2, XCircle, ArrowRight, Home, ArrowLeft, Lock as LockIcon } 
 export default function QuizPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const stepNumber = parseInt(params.step as string);
+    const queryProjectId = searchParams.get("projectId");
 
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
@@ -41,11 +43,18 @@ export default function QuizPage() {
             if (!token) return;
 
             try {
-                // First get the project ID (assuming latest project for now)
-                // In a real app, we might pass project ID via URL or context
-                const projectRes = await fetch(`${API_BASE_URL}/api/projects/latest`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                let projectRes;
+                if (queryProjectId) {
+                    projectRes = await fetch(`${API_BASE_URL}/api/projects/${queryProjectId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                } else {
+                    // Fallback to latest if no ID provided
+                    projectRes = await fetch(`${API_BASE_URL}/api/projects/latest`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
+
                 if (!projectRes.ok) throw new Error("Project not found");
                 const projectData = await projectRes.json();
                 setProjectId(projectData.id);
@@ -203,7 +212,8 @@ export default function QuizPage() {
 
     const handleNextStep = () => {
         if (stepNumber < totalSteps) {
-            router.push(`/quiz/${stepNumber + 1}`);
+            const query = projectId ? `?projectId=${projectId}` : "";
+            router.push(`/quiz/${stepNumber + 1}${query}`);
         } else {
             router.push("/");
         }
@@ -298,7 +308,8 @@ export default function QuizPage() {
                                             }`}
                                         onClick={() => {
                                             if (step.step !== stepNumber) {
-                                                router.push(`/quiz/${step.step}`);
+                                                const query = projectId ? `?projectId=${projectId}` : "";
+                                                router.push(`/quiz/${step.step}${query}`);
                                             }
                                         }}
                                     >

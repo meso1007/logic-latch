@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
@@ -23,10 +24,11 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
     const [projects, setProjects] = useState<ProjectSummary[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const { token } = useAuth();
+    const { token, logout } = useAuth();
+    const pathname = usePathname();
 
     const fetchProjects = useCallback(async () => {
-        if (!token) {
+        if (!token || ["/login", "/signup"].includes(pathname)) {
             setProjects([]);
             return;
         }
@@ -36,6 +38,12 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
             const response = await fetch(`${API_BASE_URL}/api/projects`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 setProjects(data);
@@ -45,7 +53,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [token]);
+    }, [token, logout, pathname]);
 
     const deleteProject = async (id: number) => {
         if (!token) return;
@@ -55,6 +63,11 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
+
+            if (response.status === 401) {
+                logout();
+                return;
+            }
 
             if (response.ok) {
                 setProjects((prev) => prev.filter((p) => p.id !== id));

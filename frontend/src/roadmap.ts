@@ -13,6 +13,7 @@ export interface Step {
 }
 
 export interface RoadmapResponse {
+  id: number;
   complexity: string;
   roadmap: Step[];
 }

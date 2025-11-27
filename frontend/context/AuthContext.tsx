@@ -75,6 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }),
             });
 
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+
             if (response.ok) {
                 const updatedUser = await response.json();
                 setUser(updatedUser);
