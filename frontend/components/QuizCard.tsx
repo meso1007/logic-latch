@@ -13,13 +13,9 @@ interface QuizCardProps {
 export function QuizCard({ quiz }: QuizCardProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  // 回答済みかどうか
   const isAnswered = selectedIndex !== null;
-  // 正解したかどうか（回答済みの場合のみ判定）
-  // const isCorrect = isAnswered && selectedIndex === quiz.answer_index; // 未使用のためコメントアウトまたは削除
-
   const handleSelect = (index: number) => {
-    if (isAnswered) return; // 一度答えたら変更不可
+    if (isAnswered) return;
     setSelectedIndex(index);
   };
 
@@ -39,7 +35,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
           {quiz.options.map((option, index) => {
             // 判定ロジック: 回答済みなら、正解/不正解の色をつける
             let optionStyle = "border-slate-200 hover:bg-slate-50"; // デフォルト
-            
+
             if (isAnswered) {
               if (index === quiz.answer_index) {
                 // 正解の選択肢（緑）

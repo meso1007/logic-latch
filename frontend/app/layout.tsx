@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ProjectProvider } from "@/context/ProjectContext";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
 const geistSans = Geist({
@@ -36,7 +37,9 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            <AuthenticatedLayout>{children}</AuthenticatedLayout>
+            <ProjectProvider>
+              <AuthenticatedLayout>{children}</AuthenticatedLayout>
+            </ProjectProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

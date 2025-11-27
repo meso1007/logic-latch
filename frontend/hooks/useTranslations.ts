@@ -11,7 +11,7 @@ const translations: Record<string, Messages> = {
     ja: jaMessages,
 };
 
-export function useTranslations() {
+export function useTranslations(namespace?: string) {
     const [locale, setLocale] = useState<string>("ja");
     const [messages, setMessages] = useState<Messages>(jaMessages);
 
@@ -21,15 +21,30 @@ export function useTranslations() {
         setMessages(translations[storedLocale] || jaMessages);
     }, []);
 
-    const t = (key: string): string => {
-        const keys = key.split(".");
+    const t = <T = string>(key: string, params?: Record<string, any>): T => {
+        const fullKey = namespace ? `${namespace}.${key}` : key;
+        const keys = fullKey.split(".");
         let value: any = messages;
 
         for (const k of keys) {
             value = value?.[k];
         }
 
-        return value || key;
+        if (params?.returnObjects) {
+            return (value || key) as T;
+        }
+
+        let text = (typeof value === "string" ? value : JSON.stringify(value)) || key;
+
+        if (params && typeof text === "string") {
+            Object.entries(params).forEach(([paramKey, paramValue]) => {
+                if (paramKey !== "returnObjects") {
+                    text = text.replace(`{${paramKey}}`, String(paramValue));
+                }
+            });
+        }
+
+        return text as T;
     };
 
     return { t, locale };

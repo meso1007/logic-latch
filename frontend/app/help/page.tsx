@@ -28,96 +28,98 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "@/hooks/useTranslations";
 
 export default function HelpPage() {
     const router = useRouter();
+    const { t } = useTranslations();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
 
     const categories = [
-        { id: "all", name: "All", icon: Sparkles },
-        { id: "getting-started", name: "Start", icon: Zap },
-        { id: "projects", name: "Projects", icon: FileText },
-        { id: "quizzes", name: "Quiz", icon: BookOpen },
-        { id: "account", name: "Account", icon: Users },
+        { id: "all", name: t("help.categories.all"), icon: Sparkles },
+        { id: "getting-started", name: t("help.categories.getting-started"), icon: Zap },
+        { id: "projects", name: t("help.categories.projects"), icon: FileText },
+        { id: "quizzes", name: t("help.categories.quizzes"), icon: BookOpen },
+        { id: "account", name: t("help.categories.account"), icon: Users },
     ];
 
     const faqs = [
         {
             category: "getting-started",
-            question: "Reverse Learnとは何ですか？",
-            answer: "Reverse Learnは、AIを活用してあなたの学習目標に合わせたカスタマイズされた学習ロードマップを生成するプラットフォームです。プロジェクトベースの学習を通じて、効率的にスキルを習得できます。",
+            question: t("help.faqItems.q1"),
+            answer: t("help.faqItems.a1"),
         },
         {
             category: "getting-started",
-            question: "どのように始めればいいですか？",
-            answer: "まずアカウントを作成し、ホームページで「作りたいもの」を入力してください。AIが最適な技術スタックと学習ステップを提案します。その後、各ステップのクイズに挑戦しながら学習を進めていきます。",
+            question: t("help.faqItems.q2"),
+            answer: t("help.faqItems.a2"),
         },
         {
             category: "projects",
-            question: "プロジェクトの作成方法は？",
-            answer: "ホームページで学習目標、技術スタック（任意）、現在のレベルを入力し、「プランを提案」ボタンをクリックしてください。AIが提案したプランを確認・編集した後、「このプランで進める」をクリックすると詳細なロードマップが生成されます。",
+            question: t("help.faqItems.q3"),
+            answer: t("help.faqItems.a3"),
         },
         {
             category: "projects",
-            question: "プロジェクトを編集できますか？",
-            answer: "はい、ロードマップページの「設定を編集して再生成」ボタンから編集できます。技術スタックや学習ステップを変更して、あなたのニーズに合わせてカスタマイズできます。",
+            question: t("help.faqItems.q4"),
+            answer: t("help.faqItems.a4"),
         },
         {
             category: "projects",
-            question: "過去のプロジェクトを確認するには？",
-            answer: "サイドバーの「History」セクションから過去のプロジェクトにアクセスできます。検索機能を使って特定のプロジェクトを素早く見つけることもできます。",
+            question: t("help.faqItems.q5"),
+            answer: t("help.faqItems.a5"),
         },
         {
             category: "quizzes",
-            question: "クイズの難易度を変更できますか？",
-            answer: "はい、プロジェクト作成時にレベル（初心者・中級者・上級者）を選択することで、クイズの難易度が自動的に調整されます。初心者向けは基本的な概念、上級者向けはパフォーマンス最適化やセキュリティなど高度な内容が含まれます。",
+            question: t("help.faqItems.q6"),
+            answer: t("help.faqItems.a6"),
         },
         {
             category: "quizzes",
-            question: "クイズの結果はどこで確認できますか？",
-            answer: "各ステップのクイズを完了すると、スコアと正解率が表示されます。ロードマップページでは各ステップの完了状況とスコアを一覧で確認できます。",
+            question: t("help.faqItems.q7"),
+            answer: t("help.faqItems.a7"),
         },
         {
             category: "quizzes",
-            question: "クイズは何問ありますか？",
-            answer: "各ステップには10問の4択クイズが用意されています。問題は段階的に難易度が上がり、基礎から応用まで幅広くカバーしています。",
+            question: t("help.faqItems.q8"),
+            answer: t("help.faqItems.a8"),
         },
         {
             category: "account",
-            question: "無料プランの制限は？",
-            answer: "無料プランでは月5プロジェクトまで作成できます。無制限に利用したい場合や、優先サポート、高度な分析機能をご希望の場合は、Proプランへのアップグレードをご検討ください。",
+            question: t("help.faqItems.q9"),
+            answer: t("help.faqItems.a9"),
         },
         {
             category: "account",
-            question: "プロフィール情報を変更するには？",
-            answer: "設定ページからユーザー名、プロフィール画像を変更できます。サイドバーのユーザーメニューから「設定」を選択してください。",
+            question: t("help.faqItems.q10"),
+            answer: t("help.faqItems.a10"),
         },
         {
             category: "account",
-            question: "言語設定を変更できますか？",
-            answer: "はい、サイドバーの上部にある言語切り替えボタンから、日本語と英語を切り替えることができます。設定は自動的に保存されます。",
+            question: t("help.faqItems.q11"),
+            answer: t("help.faqItems.a11"),
         },
     ];
 
     const tutorials = [
         {
-            title: "Quick Start",
-            description: "5分で始める Reverse Learn",
+            title: t("help.tutorials.quickStart.title"),
+            description: t("help.tutorials.quickStart.desc"),
             duration: "5:23",
             image: "bg-[#F5F5F0]",
             icon: Zap
         },
         {
-            title: "Projects",
-            description: "最適な学習プランを作成するコツ",
+            title: t("help.tutorials.projects.title"),
+            description: t("help.tutorials.projects.desc"),
             duration: "8:15",
             image: "bg-[#F0F2F5]",
             icon: FileText
         },
         {
-            title: "Mastery",
-            description: "学習効果を最大化する方法",
+            title: t("help.tutorials.mastery.title"),
+            description: t("help.tutorials.mastery.desc"),
             duration: "6:42",
             image: "bg-[#F0F5F2]",
             icon: TrendingUp
@@ -155,13 +157,13 @@ export default function HelpPage() {
                         <div className="w-10 h-10 rounded-full border-[0.5px] border-emerald-200/60 flex items-center justify-center group-hover:border-emerald-950 group-hover:rotate-45 transition-all duration-700 bg-white/50 backdrop-blur-sm">
                             <ArrowUpRight className="h-3.5 w-3.5 rotate-[225deg]" />
                         </div>
-                        <span className="font-light tracking-wide text-sm uppercase">Back</span>
+                        <span className="font-light tracking-wide text-sm uppercase">{t("help.nav.back")}</span>
                     </Button>
 
                     <div className="hidden lg:flex items-center gap-8">
-                        <div className="text-xs font-medium text-slate-400 tracking-widest uppercase rotate-90 origin-right translate-x-4">Support</div>
+                        <div className="text-xs font-medium text-slate-400 tracking-widest uppercase rotate-90 origin-right translate-x-4">{t("help.nav.support")}</div>
                         <div className="h-20 w-[0.5px] bg-emerald-200/60" />
-                        <div className="text-xs font-medium text-emerald-950 tracking-widest uppercase">Concierge</div>
+                        <div className="text-xs font-medium text-emerald-950 tracking-widest uppercase">{t("help.nav.concierge")}</div>
                     </div>
                 </div>
 
@@ -170,11 +172,11 @@ export default function HelpPage() {
                     <div className="grid lg:grid-cols-12 gap-8 items-end">
                         <div className="lg:col-span-8 relative z-10">
                             <h1 className="text-[5rem] lg:text-[7.5rem] leading-[0.9] font-medium tracking-tighter mb-16 text-emerald-950 lg:ml-24">
-                                We are here <br />
+                                {t("help.hero.title1")} <br />
                                 <span className="font-serif italic font-light text-slate-500 pr-4">
-                                    to assist
+                                    {t("help.hero.title2")}
                                 </span>
-                                you.
+                                {t("help.hero.title3")}
                             </h1>
 
                             {/* Refined Search Bar */}
@@ -183,7 +185,7 @@ export default function HelpPage() {
                                 <div className="relative bg-white rounded-full shadow-[0_2px_40px_rgba(0,0,0,0.04)] border-[0.5px] border-emerald-100 p-2 pl-8 flex items-center transition-all duration-700 group-hover:shadow-[0_4px_60px_rgba(0,0,0,0.06)] group-hover:border-emerald-200">
                                     <Search className="h-4 w-4 text-slate-400" />
                                     <Input
-                                        placeholder="Search for assistance..."
+                                        placeholder={t("help.hero.searchPlaceholder")}
                                         className="border-0 shadow-none focus-visible:ring-0 text-base h-12 bg-transparent placeholder:text-slate-400 font-light tracking-wide text-emerald-950"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -202,7 +204,7 @@ export default function HelpPage() {
 
                             <div className="text-right relative z-10">
                                 <div className="text-5xl font-light tracking-tighter mb-3 font-serif italic text-emerald-950">98<span className="text-2xl not-italic ml-1">%</span></div>
-                                <div className="text-[10px] text-slate-400 font-medium uppercase tracking-[0.2em] border-t-[0.5px] border-emerald-200 pt-4 inline-block min-w-[100px]">Satisfaction</div>
+                                <div className="text-[10px] text-slate-400 font-medium uppercase tracking-[0.2em] border-t-[0.5px] border-emerald-200 pt-4 inline-block min-w-[100px]">{t("help.hero.satisfaction")}</div>
                             </div>
                         </div>
                     </div>
@@ -214,7 +216,7 @@ export default function HelpPage() {
                     {/* Navigation */}
                     <div className="lg:w-1/4">
                         <div className="sticky top-12 space-y-10">
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-8">Categories</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-8">{t("help.nav.categories")}</h3>
                             <div className="flex flex-col items-start gap-5">
                                 {categories.map((category) => (
                                     <button
@@ -241,8 +243,8 @@ export default function HelpPage() {
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-emerald-900 opacity-0 group-hover:opacity-20 transition-opacity duration-700" />
                                 <div className="relative z-10">
                                     <Crown className="h-5 w-5 text-[#D4AF37] mb-4" />
-                                    <div className="text-[10px] font-medium text-emerald-200 tracking-[0.2em] uppercase mb-3">Premium</div>
-                                    <div className="text-xl font-light leading-snug mb-6 font-serif italic">Unlock your full potential.</div>
+                                    <div className="text-[10px] font-medium text-emerald-200 tracking-[0.2em] uppercase mb-3">{t("help.nav.premium")}</div>
+                                    <div className="text-xl font-light leading-snug mb-6 font-serif italic">{t("help.nav.unlockPotential")}</div>
                                     <ArrowUpRight className="h-4 w-4 text-[#D4AF37]" />
                                 </div>
                             </div>
@@ -275,7 +277,7 @@ export default function HelpPage() {
                                 </div>
                             ) : (
                                 <div className="py-20 text-center lg:text-left">
-                                    <p className="text-xl text-slate-400 font-light italic font-serif">No results found.</p>
+                                    <p className="text-xl text-slate-400 font-light italic font-serif">{t("help.noResults")}</p>
                                 </div>
                             )}
                         </div>
@@ -283,8 +285,8 @@ export default function HelpPage() {
                         {/* Tutorials Section */}
                         <div className="relative w-[100vw] lg:w-auto left-[50%] right-[50%] mx-[-50vw] lg:mx-0 lg:left-0 lg:right-0 px-6 lg:px-0 mb-40">
                             <div className="flex justify-between items-end mb-16 lg:px-0 max-w-[1600px] mx-auto border-b-[0.5px] border-emerald-100 pb-6">
-                                <h2 className="text-3xl font-light tracking-tight text-emerald-950">Video Guides</h2>
-                                <Button variant="link" className="text-emerald-950 hover:text-[#D4AF37] transition-colors font-light tracking-wide">View all</Button>
+                                <h2 className="text-3xl font-light tracking-tight text-emerald-950">{t("help.tutorials.title")}</h2>
+                                <Button variant="link" className="text-emerald-950 hover:text-[#D4AF37] transition-colors font-light tracking-wide">{t("help.tutorials.viewAll")}</Button>
                             </div>
 
                             <div className="flex gap-10 overflow-x-auto pb-12 snap-x lg:px-0 max-w-[1600px] mx-auto no-scrollbar">
@@ -315,23 +317,23 @@ export default function HelpPage() {
                         <div className="border-t-[0.5px] border-emerald-100 pt-24 pb-12">
                             <div className="grid lg:grid-cols-2 gap-16">
                                 <div>
-                                    <h2 className="text-2xl font-light mb-8 text-emerald-950">Still need assistance?</h2>
+                                    <h2 className="text-2xl font-light mb-8 text-emerald-950">{t("help.footer.title")}</h2>
                                     <p className="text-slate-600 mb-10 max-w-md text-sm leading-relaxed font-light">
-                                        Our concierge team is available 24/7 to ensure your experience is flawless.
+                                        {t("help.footer.desc")}
                                     </p>
                                     <Button className="bg-emerald-950 text-white hover:bg-emerald-900 rounded-none px-10 py-6 text-sm tracking-widest uppercase transition-colors duration-500">
-                                        Contact Concierge
+                                        {t("help.footer.contactBtn")}
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-12 text-xs text-slate-500">
                                     <div className="space-y-6">
-                                        <div className="font-bold text-emerald-950 uppercase tracking-[0.2em] mb-8">Legal</div>
-                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">Privacy Policy</a>
-                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">Terms of Service</a>
-                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">Cookie Policy</a>
+                                        <div className="font-bold text-emerald-950 uppercase tracking-[0.2em] mb-8">{t("help.footer.legal")}</div>
+                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">{t("help.footer.privacy")}</a>
+                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">{t("help.footer.terms")}</a>
+                                        <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">{t("help.footer.cookie")}</a>
                                     </div>
                                     <div className="space-y-6">
-                                        <div className="font-bold text-emerald-950 uppercase tracking-[0.2em] mb-8">Social</div>
+                                        <div className="font-bold text-emerald-950 uppercase tracking-[0.2em] mb-8">{t("help.footer.social")}</div>
                                         <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">Twitter</a>
                                         <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">GitHub</a>
                                         <a href="#" className="block hover:text-emerald-950 transition-colors duration-300">Discord</a>

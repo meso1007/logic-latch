@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "@/hooks/useTranslations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Circle, ArrowLeft } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
 
 export default function RoadmapPage() {
     const [roadmap, setRoadmap] = useState<any[]>([]);
@@ -18,6 +19,7 @@ export default function RoadmapPage() {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("id");
     const { token } = useAuth();
+    const { t } = useTranslations();
 
     useEffect(() => {
         const fetchRoadmap = async () => {
@@ -85,7 +87,7 @@ export default function RoadmapPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <p className="text-gray-600">ロードマップを読み込み中...</p>
+                <p className="text-gray-600">{t('common.loading')}</p>
             </div>
         );
     }
@@ -93,7 +95,7 @@ export default function RoadmapPage() {
     if (!roadmap || roadmap.length === 0) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <p className="text-gray-600">ロードマップがありません。ホームで作成してください。</p>
+                <p className="text-gray-600">{t('roadmap.noRoadmap')}</p>
             </div>
         );
     }
@@ -102,12 +104,12 @@ export default function RoadmapPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
             <Card className="max-w-4xl mx-auto">
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="text-2xl">学習ロードマップ</CardTitle>
+                    <CardTitle className="text-2xl">{t('roadmap.title')}</CardTitle>
                     <Button
                         variant="outline"
                         onClick={() => router.push(`/?edit_id=${projectId || ""}`)}
                     >
-                        設定を編集して再生成
+                        {t('roadmap.editSettings')}
                     </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">

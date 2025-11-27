@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "@/hooks/useTranslations";
 import { useAuth } from "@/context/AuthContext";
+import { useProjects } from "@/context/ProjectContext";
 import { RoadmapResponse, Step } from "@/src/roadmap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, X } from "lucide-react";
 
 // Constants
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
 
 interface PlanStep {
   step: number;
@@ -41,15 +42,36 @@ export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useAuth();
+  const { fetchProjects } = useProjects();
   const { t, locale } = useTranslations();
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-      return;
+    // Check for pending project from localStorage after login
+    const pendingProjectStr = localStorage.getItem("pendingProject");
+    if (pendingProjectStr && token) {
+      try {
+        const pendingProject = JSON.parse(pendingProjectStr);
+        setGoal(pendingProject.goal);
+        setStack(pendingProject.stack);
+        setLevel(pendingProject.level);
+        setEditingPlan(pendingProject.editingPlan);
+        setProposedPlan(pendingProject.proposedPlan);
+        // Optional: clear it after loading, or keep it until successfully generated
+        // localStorage.removeItem("pendingProject"); 
+      } catch (e) {
+        console.error("Failed to parse pending project", e);
+      }
     }
 
     const fetchProject = async () => {
+      // If we have a pending project loaded, don't fetch latest
+      if (pendingProjectStr && token) return;
+
+      if (!token) {
+        // If not logged in, just return (don't fetch latest project)
+        return;
+      }
+
       const isNew = searchParams.get("new") === "true";
       const editId = searchParams.get("edit_id");
 
@@ -78,7 +100,7 @@ export default function Home() {
             // Don't set roadmap, so user sees the form to regenerate
             setRoadmap(null);
             setProposedPlan(null); // Clear proposed plan
-            setEditingPlan(null); // Clear editing plan
+            setEditingPlan(null);
           }
         } catch (error) {
           console.error("Failed to fetch project for editing:", error);
@@ -99,7 +121,7 @@ export default function Home() {
           setStack(data.stack);
           setLevel(data.level);
           setProposedPlan(null); // Clear proposed plan
-          setEditingPlan(null); // Clear editing plan
+          setEditingPlan(null);
         }
       } catch (error) {
         console.error("Failed to fetch latest project:", error);
@@ -148,7 +170,21 @@ export default function Home() {
 
 
   const handleGenerate = async () => {
-    if (!editingPlan || !token) return;
+    if (!editingPlan) return;
+
+    // Freemium Logic: If not logged in, save state and redirect to signup
+    if (!token) {
+      const pendingProject = {
+        goal,
+        stack,
+        level,
+        editingPlan,
+        proposedPlan
+      };
+      localStorage.setItem("pendingProject", JSON.stringify(pendingProject));
+      router.push("/signup?redirect=generate");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -175,7 +211,11 @@ export default function Home() {
 
       const data: RoadmapResponse = await response.json();
       setRoadmap(data);
-      // No need to save to localStorage anymore
+      // Clear pending project if successful
+      localStorage.removeItem("pendingProject");
+
+      // Refresh sidebar list
+      fetchProjects();
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
@@ -280,7 +320,7 @@ export default function Home() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="advanced" id="advanced" />
                   <Label htmlFor="advanced" className="font-normal cursor-pointer">
-                    {t('levelAdvanced')}
+                    {t('Home.levelAdvanced')}
                   </Label>
                 </div>
               </RadioGroup>

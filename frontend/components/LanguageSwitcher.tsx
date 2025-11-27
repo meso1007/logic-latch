@@ -32,14 +32,14 @@ export function LanguageSwitcher() {
                     className={`cursor-pointer focus:bg-emerald-800 focus:text-white ${currentLocale === "ja" ? "bg-emerald-800" : ""
                         }`}
                 >
-                    🇯🇵 日本語
+                    🇯JP
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() => handleLanguageChange("en")}
                     className={`cursor-pointer focus:bg-emerald-800 focus:text-white ${currentLocale === "en" ? "bg-emerald-800" : ""
                         }`}
                 >
-                    🇺🇸 English
+                    🇺EN
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

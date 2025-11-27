@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "@/hooks/useTranslations";
 import { Quiz } from "@/src/roadmap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, XCircle, ArrowRight, Home, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, Home, ArrowLeft, Lock as LockIcon } from "lucide-react";
 
 export default function QuizPage() {
     const params = useParams();
@@ -29,9 +30,10 @@ export default function QuizPage() {
     const [allSteps, setAllSteps] = useState<any[]>([]);
     const [stepScores, setStepScores] = useState<any>({});
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+    const { t, locale } = useTranslations("Quiz");
 
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [projectId, setProjectId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -106,6 +108,7 @@ export default function QuizPage() {
                         step_number: stepNumber,
                         step_title: "", // Backend will find it or we need to pass it? Backend finds it from DB if exists.
                         step_desc: "",
+                        locale,
                     }),
                 });
 
@@ -215,9 +218,43 @@ export default function QuizPage() {
                 <Card>
                     <CardContent className="p-8 text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
-                        <p className="text-lg font-semibold text-slate-900">クイズを生成中...</p>
-                        <p className="text-sm text-slate-600 mt-2">少々お待ちください</p>
+                        <p className="text-lg font-semibold text-slate-900">{t("generating")}</p>
+                        <p className="text-sm text-slate-600 mt-2">{t("waitMoment")}</p>
                     </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    const isPro = user?.plan === "pro"; // Assuming user object has a plan field
+    const isLocked = stepNumber >= 4 && !isPro;
+
+    if (isLocked) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8 flex items-center justify-center">
+                <Card className="max-w-md w-full text-center p-8 shadow-2xl border-slate-200">
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <LockIcon className="h-8 w-8 text-slate-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                        {t("paywall.title", { defaultValue: "Unlock Complex Logic" })}
+                    </h2>
+                    <p className="text-slate-600 mb-8 leading-relaxed">
+                        {t("paywall.description", { defaultValue: "Step 4+ involves complex logic and security checks. Upgrade to Reverse Learn Advanced to ensure your code is safe and scalable." })}
+                    </p>
+                    <Button
+                        onClick={() => router.push("/upgrade")}
+                        className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-medium transition-all shadow-lg hover:shadow-xl"
+                    >
+                        {t("paywall.button", { defaultValue: "Upgrade to Pro" })}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onClick={handleBackToRoadmap}
+                        className="mt-4 text-slate-400 hover:text-slate-600"
+                    >
+                        {t("backToRoadmap")}
+                    </Button>
                 </Card>
             </div>
         );
@@ -228,9 +265,9 @@ export default function QuizPage() {
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8 flex items-center justify-center">
                 <Card>
                     <CardContent className="p-6">
-                        <p>クイズが見つかりません</p>
+                        <p>{t("notFound")}</p>
                         <Button onClick={handleBackToRoadmap} className="mt-4">
-                            ロードマップに戻る
+                            {t("backToRoadmap")}
                         </Button>
                     </CardContent>
                 </Card>
@@ -246,8 +283,8 @@ export default function QuizPage() {
                     <div className="lg:col-span-3">
                         <Card className="sticky top-8">
                             <CardHeader>
-                                <CardTitle className="text-lg">学習ステップ</CardTitle>
-                                <CardDescription className="text-xs">進捗状況</CardDescription>
+                                <CardTitle className="text-lg">{t("learningSteps")}</CardTitle>
+                                <CardDescription className="text-xs">{t("progress")}</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {allSteps.map((step) => (
@@ -280,7 +317,7 @@ export default function QuizPage() {
                                             <div className="mt-1 text-xs text-green-600 flex items-center justify-between gap-1">
                                                 <div className="flex items-center gap-1">
                                                     <CheckCircle2 className="h-3 w-3" />
-                                                    完了
+                                                    {t("completed")}
                                                 </div>
                                                 <span className="font-semibold">
                                                     {stepScores[step.step].score}/{stepScores[step.step].total} ({stepScores[step.step].percentage}%)
@@ -289,7 +326,7 @@ export default function QuizPage() {
                                         )}
                                         {step.step === stepNumber && (
                                             <div className="mt-1 text-xs text-white/80">
-                                                進行中
+                                                {t("inProgress")}
                                             </div>
                                         )}
                                     </div>
@@ -304,11 +341,11 @@ export default function QuizPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold text-slate-900">Step {stepNumber}: {stepTitle}</h1>
-                                {!showFinalResult && <p className="text-slate-600 mt-1">クイズ {currentQuizIndex + 1} / {quizzes.length}</p>}
+                                {!showFinalResult && <p className="text-slate-600 mt-1">{t("question")} {currentQuizIndex + 1} / {quizzes.length}</p>}
                             </div>
                             <Button variant="outline" onClick={handleBackToRoadmap} className="gap-2">
                                 <Home className="h-4 w-4" />
-                                ロードマップ
+                                {t("backToRoadmap")}
                             </Button>
 
                         </div>
@@ -326,7 +363,7 @@ export default function QuizPage() {
                                 {/* Quiz Card */}
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle className="text-xl">問題 {currentQuizIndex + 1}</CardTitle>
+                                        <CardTitle className="text-xl">{t("question")} {currentQuizIndex + 1}</CardTitle>
                                         <CardDescription className="text-base mt-2">{currentQuiz.question}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-6">
@@ -365,7 +402,7 @@ export default function QuizPage() {
                                         {showResult && (
                                             <div className={`p-4 rounded-lg ${isCorrect ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
                                                 <p className={`font-semibold mb-2 ${isCorrect ? "text-green-900" : "text-red-900"}`}>
-                                                    {isCorrect ? "✓ 正解！" : "✗ 不正解"}
+                                                    {isCorrect ? t("correct") : t("incorrect")}
                                                 </p>
                                                 <p className={`text-sm ${isCorrect ? "text-green-800" : "text-red-800"}`}>
                                                     {currentQuiz.explanation}
@@ -381,7 +418,7 @@ export default function QuizPage() {
                                                 className="gap-2"
                                             >
                                                 <ArrowLeft className="h-4 w-4" />
-                                                前の問題
+                                                {t("previous")}
                                             </Button>
 
                                             {!showResult ? (
@@ -390,16 +427,16 @@ export default function QuizPage() {
                                                     disabled={selectedAnswer === null}
                                                     className="bg-slate-900 hover:bg-slate-800"
                                                 >
-                                                    回答する
+                                                    {t("answer")}
                                                 </Button>
                                             ) : currentQuizIndex < quizzes.length - 1 ? (
                                                 <Button onClick={handleNext} className="gap-2 bg-slate-900 hover:bg-slate-800">
-                                                    次の問題
+                                                    {t("next")}
                                                     <ArrowRight className="h-4 w-4" />
                                                 </Button>
                                             ) : (
                                                 <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700">
-                                                    結果を見る
+                                                    {t("viewResult")}
                                                     <CheckCircle2 className="h-4 w-4" />
                                                 </Button>
                                             )}
@@ -416,17 +453,17 @@ export default function QuizPage() {
                                     <div className="text-center space-y-6">
                                         <div>
                                             <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-400" />
-                                            <h2 className="text-3xl font-bold mb-2">Step {stepNumber} 完了！</h2>
+                                            <h2 className="text-3xl font-bold mb-2">{t("stepCompleted", { step: stepNumber })}</h2>
                                             <p className="text-slate-300">{stepTitle}</p>
                                         </div>
 
                                         <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-                                            <p className="text-slate-300 mb-2">あなたのスコア</p>
+                                            <p className="text-slate-300 mb-2">{t("yourScore")}</p>
                                             <p className="text-5xl font-bold mb-2">
                                                 {score} / {quizzes.length}
                                             </p>
                                             <p className="text-2xl text-slate-300">
-                                                正答率: {Math.round((score / quizzes.length) * 100)}%
+                                                {t("accuracy")}: {Math.round((score / quizzes.length) * 100)}%
                                             </p>
                                         </div>
 
@@ -438,7 +475,7 @@ export default function QuizPage() {
                                                         size="lg"
                                                         className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                                                     >
-                                                        次のステップへ進む (Step {stepNumber + 1})
+                                                        {t("nextStep", { step: stepNumber + 1 })}
                                                         <ArrowRight className="h-5 w-5" />
                                                     </Button>
                                                     <Button
@@ -447,7 +484,7 @@ export default function QuizPage() {
                                                         size="lg"
                                                         className="w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
                                                     >
-                                                        ロードマップに戻る
+                                                        {t("backToRoadmap")}
                                                     </Button>
                                                 </>
                                             ) : (
@@ -457,7 +494,7 @@ export default function QuizPage() {
                                                     className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                                                 >
                                                     <CheckCircle2 className="h-5 w-5" />
-                                                    全ステップ完了！ロードマップに戻る
+                                                    {t("allCompleted")}
                                                 </Button>
                                             )}
                                         </div>
