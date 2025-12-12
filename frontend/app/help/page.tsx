@@ -29,6 +29,8 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/hooks/useTranslations";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants, fadeInVariants } from "@/lib/animations";
 
 export default function HelpPage() {
     const router = useRouter();
@@ -168,7 +170,12 @@ export default function HelpPage() {
                 </div>
 
                 {/* Hero Section */}
-                <div className="relative mb-48">
+                <motion.div
+                    className="relative mb-48"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
                     <div className="grid lg:grid-cols-12 gap-8 items-end">
                         <div className="lg:col-span-8 relative z-10">
                             <h1 className="text-[5rem] lg:text-[7.5rem] leading-[0.9] font-medium tracking-tighter mb-16 text-emerald-950 lg:ml-24">
@@ -208,7 +215,7 @@ export default function HelpPage() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Content Layout */}
                 <div className="flex flex-col lg:flex-row gap-24 mb-32">

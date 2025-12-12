@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Check, Sparkles, Zap, ArrowUpRight, MoveRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/hooks/useTranslations";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants, cardVariants } from "@/lib/animations";
 
 export default function UpgradePage() {
     const { user } = useAuth();
@@ -53,20 +55,31 @@ export default function UpgradePage() {
                 </div>
 
                 {/* Mobile Title (visible only on small screens) */}
-                <div className="lg:hidden mb-12">
+                <motion.div
+                    className="lg:hidden mb-12"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
                     <h1 className="text-3xl font-medium tracking-tight text-slate-900">
                         {t("upgrade.title")}
                     </h1>
                     <p className="text-slate-500 mt-2">
                         {t("upgrade.subtitle")}
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Pricing Grid */}
-                <div className="grid lg:grid-cols-2 gap-6 items-stretch max-w-5xl mx-auto">
-                    {plans.map((plan) => (
-                        <div
+                <motion.div
+                    className="grid lg:grid-cols-2 gap-6 items-stretch max-w-5xl mx-auto"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {plans.map((plan, index) => (
+                        <motion.div
                             key={plan.key}
+                            variants={itemVariants}
                             className={cn(
                                 "relative rounded-3xl p-8 flex flex-col transition-all duration-300",
                                 plan.highlight
@@ -142,9 +155,9 @@ export default function UpgradePage() {
                                     ))}
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
 
                 {/* FAQ Link */}
                 <div className="mt-20 text-center">

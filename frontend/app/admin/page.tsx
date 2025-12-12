@@ -7,6 +7,8 @@ import { useTranslations } from "@/hooks/useTranslations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, FolderKanban, Shield, Trash2, UserCog } from "lucide-react";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
 
@@ -109,43 +111,59 @@ export default function AdminPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
             <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
+                <motion.div
+                    className="mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">{t("admin.title")}</h1>
                     <p className="text-slate-600">{t("admin.subtitle")}</p>
-                </div>
+                </motion.div>
 
                 {/* Stats Cards */}
-                <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">{t("admin.totalUsers")}</CardTitle>
-                            <Users className="h-4 w-4 text-emerald-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats?.total_users || 0}</div>
-                        </CardContent>
-                    </Card>
+                <motion.div
+                    className="grid md:grid-cols-3 gap-6 mb-8"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    <motion.div variants={itemVariants}>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium">{t("admin.totalUsers")}</CardTitle>
+                                <Users className="h-4 w-4 text-emerald-600" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats?.total_users || 0}</div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">{t("admin.totalProjects")}</CardTitle>
-                            <FolderKanban className="h-4 w-4 text-emerald-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats?.total_projects || 0}</div>
-                        </CardContent>
-                    </Card>
+                    <motion.div variants={itemVariants}>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium">{t("admin.totalProjects")}</CardTitle>
+                                <FolderKanban className="h-4 w-4 text-emerald-600" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats?.total_projects || 0}</div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">{t("admin.totalAdmins")}</CardTitle>
-                            <Shield className="h-4 w-4 text-emerald-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats?.total_admins || 0}</div>
-                        </CardContent>
-                    </Card>
-                </div>
+                    <motion.div variants={itemVariants}>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium">{t("admin.totalAdmins")}</CardTitle>
+                                <Shield className="h-4 w-4 text-emerald-600" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats?.total_admins || 0}</div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </motion.div>
 
                 {/* Users Table */}
                 <Card>

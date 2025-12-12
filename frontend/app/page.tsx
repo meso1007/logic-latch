@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants, cardVariants } from "@/lib/animations";
 
 // Constants
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
@@ -170,7 +172,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error(t('Home.errorMessage'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || t('Home.errorMessage'));
       }
 
       const data: ProposeResponse = await response.json();
@@ -226,7 +229,8 @@ export default function Home() {
       }
 
       if (!response.ok) {
-        throw new Error(t('Home.errorMessage'));
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || t('Home.errorMessage'));
       }
 
       const data: RoadmapResponse = await response.json();
@@ -289,74 +293,85 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <motion.div
+          className="text-center space-y-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <h1 className="text-4xl font-bold text-slate-900">{t('Home.title')}</h1>
           <p className="text-slate-600">{t('Home.subtitle')}</p>
-        </div>
+        </motion.div>
 
         {/* Input Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('Home.projectInfo')}</CardTitle>
-            <CardDescription>{t('Home.projectInfoDesc')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="goal">{t('Home.goalLabel')}</Label>
-              <Textarea
-                id="goal"
-                placeholder={t('Home.goalPlaceholder')}
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stack">{t('Home.stackLabel')}</Label>
-              <Input
-                id="stack"
-                placeholder={t('Home.stackPlaceholder')}
-                value={stack}
-                onChange={(e) => setStack(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t('Home.levelLabel')}</Label>
-              <RadioGroup value={level} onValueChange={setLevel}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="beginner" id="beginner" />
-                  <Label htmlFor="beginner" className="font-normal cursor-pointer">
-                    {t('Home.levelBeginner')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="intermediate" id="intermediate" />
-                  <Label htmlFor="intermediate" className="font-normal cursor-pointer">
-                    {t('Home.levelIntermediate')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="advanced" id="advanced" />
-                  <Label htmlFor="advanced" className="font-normal cursor-pointer">
-                    {t('Home.levelAdvanced')}
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <Button onClick={handlePropose} disabled={loading || !goal.trim()} className="w-full">
-              {loading ? t('Home.loading') : t('Home.proposeButton')}
-            </Button>
-
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                {error}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('Home.projectInfo')}</CardTitle>
+              <CardDescription>{t('Home.projectInfoDesc')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="goal">{t('Home.goalLabel')}</Label>
+                <Textarea
+                  id="goal"
+                  placeholder={t('Home.goalPlaceholder')}
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  rows={3}
+                />
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <div className="space-y-2">
+                <Label htmlFor="stack">{t('Home.stackLabel')}</Label>
+                <Input
+                  id="stack"
+                  placeholder={t('Home.stackPlaceholder')}
+                  value={stack}
+                  onChange={(e) => setStack(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('Home.levelLabel')}</Label>
+                <RadioGroup value={level} onValueChange={setLevel}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="beginner" id="beginner" />
+                    <Label htmlFor="beginner" className="font-normal cursor-pointer">
+                      {t('Home.levelBeginner')}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="intermediate" id="intermediate" />
+                    <Label htmlFor="intermediate" className="font-normal cursor-pointer">
+                      {t('Home.levelIntermediate')}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="advanced" id="advanced" />
+                    <Label htmlFor="advanced" className="font-normal cursor-pointer">
+                      {t('Home.levelAdvanced')}
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <Button onClick={handlePropose} disabled={loading || !goal.trim()} className="w-full">
+                {loading ? t('Home.loading') : t('Home.proposeButton')}
+              </Button>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Proposed Plan - Confirmation & Editing */}
         {proposedPlan && editingPlan && (

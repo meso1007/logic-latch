@@ -13,6 +13,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
 
 export default function RoadmapPage() {
     const [roadmap, setRoadmap] = useState<any[]>([]);
+    const [projectTitle, setProjectTitle] = useState<string>("");
     const [stepScores, setStepScores] = useState<Record<number, any>>({});
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -55,6 +56,7 @@ export default function RoadmapPage() {
                     const data = await response.json();
                     const roadmapData = data.roadmap || [];
                     setRoadmap(roadmapData);
+                    setProjectTitle(data.goal || "");
 
                     // Map scores
                     const scores: any = {};
@@ -104,7 +106,7 @@ export default function RoadmapPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
             <Card className="max-w-4xl mx-auto">
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="text-2xl">{t('roadmap.title')}</CardTitle>
+                    <CardTitle className="text-2xl">{projectTitle || t('roadmap.title')}</CardTitle>
                     <Button
                         variant="outline"
                         onClick={() => router.push(`/?edit_id=${projectId || ""}`)}

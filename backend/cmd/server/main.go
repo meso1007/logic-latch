@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -489,6 +490,9 @@ Based on the user's request below, analyze the project complexity and propose th
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 		if err != nil {
+			if strings.Contains(err.Error(), "429") || strings.Contains(strings.ToLower(err.Error()), "quota") {
+				return c.JSON(http.StatusTooManyRequests, map[string]string{"error": "AI service is busy (Rate Limit). Please try again later."})
+			}
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "AI generation failed: " + err.Error()})
 		}
 
@@ -638,6 +642,9 @@ Based on the user's request below, create a learning roadmap.
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 		if err != nil {
+			if strings.Contains(err.Error(), "429") || strings.Contains(strings.ToLower(err.Error()), "quota") {
+				return c.JSON(http.StatusTooManyRequests, map[string]string{"error": "AI service is busy (Rate Limit). Please try again later."})
+			}
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "AI generation failed: " + err.Error()})
 		}
 
@@ -777,10 +784,30 @@ Based on the user's request below, create a learning roadmap.
 			for _, q := range existingQuizzes {
 				var options []string
 				json.Unmarshal(q.Options, &options)
+
+				// Shuffle options
+				shuffledOptions := make([]string, len(options))
+				copy(shuffledOptions, options)
+
+				// Create a mapping of old index to new index to update AnswerIndex
+				perm := rand.Perm(len(options))
+				for i, v := range perm {
+					shuffledOptions[i] = options[v]
+				}
+
+				// Find new answer index
+				newAnswerIndex := 0
+				for i, v := range perm {
+					if v == q.AnswerIndex {
+						newAnswerIndex = i
+						break
+					}
+				}
+
 				quizzes = append(quizzes, QuizResponse{
 					Question:    q.Question,
-					Options:     options,
-					AnswerIndex: q.AnswerIndex,
+					Options:     shuffledOptions,
+					AnswerIndex: newAnswerIndex,
 					Explanation: q.Explanation,
 				})
 			}
@@ -859,6 +886,9 @@ Create 10 multiple-choice quizzes to check understanding for the following learn
 		// Geminiに送信
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 		if err != nil {
+			if strings.Contains(err.Error(), "429") || strings.Contains(strings.ToLower(err.Error()), "quota") {
+				return c.JSON(http.StatusTooManyRequests, map[string]string{"error": "AI service is busy (Rate Limit). Please try again later."})
+			}
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "AI generation failed: " + err.Error()})
 		}
 
@@ -1121,10 +1151,30 @@ Create 10 multiple-choice quizzes to check understanding for the following learn
 		for _, q := range step.Quizzes {
 			var options []string
 			json.Unmarshal(q.Options, &options)
+
+			// Shuffle options
+			shuffledOptions := make([]string, len(options))
+			copy(shuffledOptions, options)
+
+			// Create a mapping of old index to new index to update AnswerIndex
+			perm := rand.Perm(len(options))
+			for i, v := range perm {
+				shuffledOptions[i] = options[v]
+			}
+
+			// Find new answer index
+			newAnswerIndex := 0
+			for i, v := range perm {
+				if v == q.AnswerIndex {
+					newAnswerIndex = i
+					break
+				}
+			}
+
 			quizzes = append(quizzes, QuizResponse{
 				Question:    q.Question,
-				Options:     options,
-				AnswerIndex: q.AnswerIndex,
+				Options:     shuffledOptions,
+				AnswerIndex: newAnswerIndex,
 				Explanation: q.Explanation,
 			})
 		}

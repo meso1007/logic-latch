@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { User, Mail, Bell, Lock, Trash2, ArrowUpRight, Camera, MoveRight } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants, fadeInVariants } from "@/lib/animations";
 
 export default function SettingsPage() {
     const { user, logout, updateProfile } = useAuth();
@@ -76,11 +78,16 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Hero Section */}
-                <div className="relative mb-24">
+                <motion.div
+                    className="relative mb-24"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
                     <h1 className="text-[5rem] lg:text-[7.5rem] leading-[0.9] font-medium tracking-tighter text-emerald-950 lg:ml-24">
                         Settings
                     </h1>
-                </div>
+                </motion.div>
 
                 <div className="grid lg:grid-cols-12 gap-16">
                     {/* Left Column: Navigation (Visual only for now) */}
@@ -104,7 +111,12 @@ export default function SettingsPage() {
                     <div className="lg:col-span-9 space-y-20">
 
                         {/* Profile Section */}
-                        <section className="space-y-12">
+                        <motion.section
+                            className="space-y-12"
+                            variants={itemVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
                             <div className="flex items-end justify-between border-b-[0.5px] border-emerald-100 pb-6">
                                 <h2 className="text-2xl font-light text-emerald-950">{t("settings.profile")}</h2>
                                 <span className="text-[10px] uppercase tracking-widest text-slate-400">01</span>
@@ -169,7 +181,7 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                             </div>
-                        </section>
+                        </motion.section>
 
                         {/* Notifications Section */}
                         <section className="space-y-12">

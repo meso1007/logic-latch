@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "@/hooks/useTranslations";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,9 @@ export function Sidebar() {
 
     // Removed local fetch logic
 
+
+    const searchParams = useSearchParams();
+    const currentProjectId = searchParams.get("id");
 
     const filteredProjects = projects.filter((project) =>
         project.goal.toLowerCase().includes(searchQuery.toLowerCase())
@@ -132,7 +135,7 @@ export function Sidebar() {
                                 key={project.id}
                                 className={cn(
                                     "group relative flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
-                                    pathname === `/roadmap` && window.location.search.includes(`id=${project.id}`)
+                                    pathname === `/roadmap` && currentProjectId === String(project.id)
                                         ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                                         : "text-emerald-100 hover:bg-emerald-800/50",
                                     isCollapsed && "justify-center px-2"
