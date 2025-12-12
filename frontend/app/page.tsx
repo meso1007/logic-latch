@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants, cardVariants } from "@/lib/animations";
+import { pollJob } from "@/lib/api";
 
 // Constants
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
@@ -176,9 +177,24 @@ export default function Home() {
         throw new Error(errorData?.error || t('Home.errorMessage'));
       }
 
-      const data: ProposeResponse = await response.json();
-      setProposedPlan(data);
-      setEditingPlan({ ...data }); // 編集用のコピーを作成
+      const data = await response.json();
+
+      // If queued (202), poll for result
+      if (response.status === 202) {
+        const result = await pollJob(data.job_id, API_BASE_URL, token || "", logout);
+        // Result is the ProposeResponse (JSON string parsed by worker? No, worker returns []byte)
+        // Wait, worker returns []byte which is the JSON string from Gemini.
+        // My pollJob returns job.result which is interface{}.
+        // The backend GET /api/jobs/:id unmarshals job.Result into interface{}.
+        // So `result` here should be the object.
+        setProposedPlan(result);
+        setEditingPlan({ ...result });
+      } else {
+        // Fallback for synchronous (if any)
+        setProposedPlan(data);
+        setEditingPlan({ ...data });
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
@@ -233,8 +249,16 @@ export default function Home() {
         throw new Error(errorData?.error || t('Home.errorMessage'));
       }
 
-      const data: RoadmapResponse = await response.json();
-      setRoadmap(data);
+      const data = await response.json();
+
+      // If queued (202), poll for result
+      if (response.status === 202) {
+        const result = await pollJob(data.job_id, API_BASE_URL, token || "", logout);
+        setRoadmap(result);
+      } else {
+        setRoadmap(data);
+      }
+
       // Clear pending project if successful
       localStorage.removeItem("pendingProject");
 

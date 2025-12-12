@@ -15,10 +15,13 @@ export function useTranslations(namespace?: string) {
     const [locale, setLocale] = useState<string>("ja");
     const [messages, setMessages] = useState<Messages>(jaMessages);
 
+    const [isLoaded, setIsLoaded] = useState(false);
+
     useEffect(() => {
         const storedLocale = (localStorage.getItem("locale") || "ja") as string;
         setLocale(storedLocale);
         setMessages(translations[storedLocale] || jaMessages);
+        setIsLoaded(true);
     }, []);
 
     const t = <T = string>(key: string, params?: Record<string, any>): T => {
@@ -47,5 +50,5 @@ export function useTranslations(namespace?: string) {
         return text as T;
     };
 
-    return { t, locale };
+    return { t, locale, isLoaded };
 }

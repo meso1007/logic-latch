@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, ArrowRight, Home, ArrowLeft, Lock as LockIcon } from "lucide-react";
+import { pollJob } from "@/lib/api";
 
 export default function QuizPage() {
     const params = useParams();
@@ -31,11 +32,12 @@ export default function QuizPage() {
     const [stepDescription, setStepDescription] = useState("");
     const [allSteps, setAllSteps] = useState<any[]>([]);
     const [stepScores, setStepScores] = useState<any>({});
+    const [error, setError] = useState<string | null>(null);
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
-    const { t, locale } = useTranslations("Quiz");
+    const { t, locale, isLoaded } = useTranslations("Quiz");
 
-    const { token, user } = useAuth();
+    const { token, user, logout } = useAuth();
     const [projectId, setProjectId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -87,10 +89,7 @@ export default function QuizPage() {
                         setAnsweredQuizzes(new Array(stepData.quizzes.length).fill(false));
                     } else {
                         // If no quizzes, generate them (fallback or new logic)
-                        // The backend generate-step-quiz should handle this if we call it?
-                        // Actually, our new backend logic for generate-step-quiz checks DB first.
-                        // So we can call generate-step-quiz if quizzes are empty.
-                        generateQuizzes(projectData);
+                        generateQuizzes(projectData, stepData);
                     }
                 } else {
                     // Step might not exist or error
@@ -101,8 +100,9 @@ export default function QuizPage() {
             }
         };
 
-        const generateQuizzes = async (project: any) => {
+        const generateQuizzes = async (project: any, stepData: any) => {
             setLoading(true);
+            setError(null);
             try {
                 const response = await fetch(`${API_BASE_URL}/api/generate-step-quiz`, {
                     method: "POST",
@@ -114,28 +114,41 @@ export default function QuizPage() {
                         goal: project.goal,
                         stack: project.stack,
                         level: project.level,
-                        step_number: stepNumber,
-                        step_title: "", // Backend will find it or we need to pass it? Backend finds it from DB if exists.
-                        step_desc: "",
+                        step_number: stepData.step,
+                        step_title: stepData.title,
+                        step_desc: stepData.description,
                         locale,
                     }),
                 });
 
-                if (!response.ok) throw new Error("Quiz generation failed");
+                if (!response.ok) {
+                    throw new Error("Failed to generate quiz");
+                }
+
                 const data = await response.json();
-                setQuizzes(data.quizzes);
-                setAnsweredQuizzes(new Array(data.quizzes.length).fill(false));
-            } catch (error) {
-                console.error("Quiz generation error:", error);
+
+                let quizzesData;
+                if (response.status === 202) {
+                    const result = await pollJob(data.job_id, API_BASE_URL, token || "", logout);
+                    quizzesData = result.quizzes;
+                } else {
+                    quizzesData = data.quizzes;
+                }
+
+                setQuizzes(quizzesData);
+                setAnsweredQuizzes(new Array(quizzesData.length).fill(false));
+            } catch (err) {
+                console.error("Error generating quiz:", err);
+                setError(t('errorGeneration'));
             } finally {
                 setLoading(false);
             }
         };
 
-        if (token) {
+        if (token && isLoaded) {
             fetchProjectAndStep();
         }
-    }, [stepNumber, token]);
+    }, [stepNumber, token, isLoaded, locale]);
 
     const currentQuiz = quizzes[currentQuizIndex];
 
@@ -247,16 +260,16 @@ export default function QuizPage() {
                         <LockIcon className="h-8 w-8 text-slate-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                        {t("paywall.title", { defaultValue: "Unlock Complex Logic" })}
+                        {t("paywall.title")}
                     </h2>
                     <p className="text-slate-600 mb-8 leading-relaxed">
-                        {t("paywall.description", { defaultValue: "Step 4+ involves complex logic and security checks. Upgrade to Reverse Learn Advanced to ensure your code is safe and scalable." })}
+                        {t("paywall.description")}
                     </p>
                     <Button
                         onClick={() => router.push("/upgrade")}
                         className="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-medium transition-all shadow-lg hover:shadow-xl"
                     >
-                        {t("paywall.button", { defaultValue: "Upgrade to Pro" })}
+                        {t("paywall.button")}
                     </Button>
                     <Button
                         variant="ghost"

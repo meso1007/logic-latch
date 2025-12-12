@@ -113,11 +113,6 @@
         "compare": "Compare plans",
         "faq": "FAQ"
     },
-    "paywall": {
-        "title": "Unlock Complex Logic",
-        "description": "Step 4+ involves complex logic and security checks. Upgrade to LogicLatch AI Advanced to ensure your code is safe and scalable.",
-        "button": "Upgrade to Pro"
-    },
     "help": {
         "title": "Help Center",
         "subtitle": "Browse FAQs and support resources",
@@ -336,6 +331,11 @@
         }
     },
     "Quiz": {
+        "paywall": {
+            "title": "Unlock Complex Logic",
+            "description": "Step 4+ involves complex logic and security checks. Upgrade to LogicLatch AI Advanced to ensure your code is safe and scalable.",
+            "button": "Upgrade to Pro"
+        },
         "generating": "Generating quiz...",
         "waitMoment": "Please wait a moment",
         "notFound": "Quiz not found",
