@@ -96,5 +96,9 @@ func main() {
 	admin.DELETE("/users/:id", h.DeleteUser)
 
 	// Start Server
-	e.Logger.Fatal(e.Start(":8081"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
 }

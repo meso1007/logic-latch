@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ COPY --from=builder /app/main .
 # COPY .env .
 
 # Expose the port
-EXPOSE 8081
+EXPOSE 8080
 
 # Command to run the executable
 CMD ["./main"]
