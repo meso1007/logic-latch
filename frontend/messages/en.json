@@ -83,7 +83,7 @@
         "subtitle": "Choose the plan that fits your learning journey",
         "plans": {
             "free": {
-                "name": "LogicLatch AI",
+                "name": "Cartes",
                 "price": "¥0",
                 "period": "/ month",
                 "description": "For personal learning and exploration.",
@@ -96,7 +96,7 @@
                 }
             },
             "pro": {
-                "name": "LogicLatch AI Advanced",
+                "name": "Cartes Advanced",
                 "price": "¥980",
                 "period": "/ month",
                 "description": "For serious learners who want to master skills faster.",
@@ -170,7 +170,7 @@
             "viewAll": "View all",
             "quickStart": {
                 "title": "Quick Start",
-                "desc": "Start LogicLatch AI in 5 mins"
+                "desc": "Start Cartes in 5 mins"
             },
             "projects": {
                 "title": "Projects",
@@ -192,8 +192,8 @@
             "social": "Social"
         },
         "faqItems": {
-            "q1": "What is LogicLatch AI?",
-            "a1": "LogicLatch AI is a platform that uses AI to generate customized learning roadmaps tailored to your learning goals. You can efficiently acquire skills through project-based learning.",
+            "q1": "What is Cartes?",
+            "a1": "Cartes is a platform that uses AI to generate customized learning roadmaps tailored to your learning goals. You can efficiently acquire skills through project-based learning.",
             "q2": "How do I get started?",
             "a2": "First, create an account and enter what you want to build on the homepage. AI will propose the optimal tech stack and learning steps. Then, proceed with learning while challenging quizzes for each step.",
             "q3": "How to create a project?",
@@ -291,7 +291,7 @@
             "s3Desc": "Break down complex projects into manageable, bite-sized learning modules."
         },
         "value": {
-            "title": "Why LogicLatch AI?",
+            "title": "Why Cartes?",
             "card1Title": "Project-Based",
             "card1Desc": "Learn by doing. Build real applications from day one.",
             "card2Title": "AI-Powered",
@@ -333,7 +333,7 @@
     "Quiz": {
         "paywall": {
             "title": "Unlock Complex Logic",
-            "description": "Step 4+ involves complex logic and security checks. Upgrade to LogicLatch AI Advanced to ensure your code is safe and scalable.",
+            "description": "Step 4+ involves complex logic and security checks. Upgrade to Cartes Advanced to ensure your code is safe and scalable.",
             "button": "Upgrade to Pro"
         },
         "generating": "Generating quiz...",
@@ -389,6 +389,6 @@
         "journey": "Journey.",
         "loginHeroText": "Your personalized AI mentor for mastering programming concepts through reverse learning.",
         "signupHeroText": "Join thousands of developers mastering complex concepts with AI-powered reverse learning.",
-        "copyright": "Copyright 2025 LogicLatch AI. All rights reserved."
+        "copyright": "Copyright 2025 Cartes. All rights reserved."
     }
 }

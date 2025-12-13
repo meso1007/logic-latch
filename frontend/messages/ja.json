@@ -83,7 +83,7 @@
         "subtitle": "学習の旅に最適なプランを選びましょう",
         "plans": {
             "free": {
-                "name": "LogicLatch AI",
+                "name": "Cartes",
                 "price": "¥0",
                 "period": "/ 月",
                 "description": "個人の学習や探索に最適です。",
@@ -96,7 +96,7 @@
                 }
             },
             "pro": {
-                "name": "LogicLatch AI Advanced",
+                "name": "Cartes Advanced",
                 "price": "¥980",
                 "period": "/ 月",
                 "description": "より早くスキルを習得したい本気の学習者向け。",
@@ -170,7 +170,7 @@
             "viewAll": "すべて見る",
             "quickStart": {
                 "title": "クイックスタート",
-                "desc": "LogicLatch AIを5分で始める"
+                "desc": "Cartesを5分で始める"
             },
             "projects": {
                 "title": "プロジェクト",
@@ -192,8 +192,8 @@
             "social": "ソーシャル"
         },
         "faqItems": {
-            "q1": "LogicLatch AIとは何ですか？",
-            "a1": "LogicLatch AIは、AIを活用してあなたの学習目標に合わせたカスタマイズされた学習ロードマップを生成するプラットフォームです。プロジェクトベースの学習を通じて、効率的にスキルを習得できます。",
+            "q1": "Cartesとは何ですか？",
+            "a1": "Cartesは、AIを活用してあなたの学習目標に合わせたカスタマイズされた学習ロードマップを生成するプラットフォームです。プロジェクトベースの学習を通じて、効率的にスキルを習得できます。",
             "q2": "どのように始めればいいですか？",
             "a2": "まずアカウントを作成し、ホームページで「作りたいもの」を入力してください。AIが最適な技術スタックと学習ステップを提案します。その後、各ステップのクイズに挑戦しながら学習を進めていきます。",
             "q3": "プロジェクトの作成方法は？",
@@ -281,7 +281,7 @@
             "p3Desc": "プロジェクトに必要なスキルではなく、断片的な構文ばかり学んでしまう。"
         },
         "solution": {
-            "title": "なぜLogicLatch AIなのか？",
+            "title": "なぜCartesなのか？",
             "subtitle": "私たちは学習の順序を逆転させます。あなたが目的地を決め、私たちが地図を提供します。",
             "s1Title": "ゴールファースト",
             "s1Desc": "「何を作りたいか」から始めます。チャットアプリ？SaaS？そこがすべての出発点です。",
@@ -333,7 +333,7 @@
     "Quiz": {
         "paywall": {
             "title": "複雑なロジックをアンロック",
-            "description": "ステップ4以降は複雑なロジックとセキュリティチェックが含まれます。LogicLatch AI Advancedにアップグレードして、コードの安全性とスケーラビリティを確保しましょう。",
+            "description": "ステップ4以降は複雑なロジックとセキュリティチェックが含まれます。Cartes Advancedにアップグレードして、コードの安全性とスケーラビリティを確保しましょう。",
             "button": "Proにアップグレード"
         },
         "generating": "クイズを生成中...",
@@ -389,6 +389,6 @@
         "journey": "始めよう。",
         "loginHeroText": "リバースラーニングを通じてプログラミングの概念を習得するための、あなただけのAIメンター。",
         "signupHeroText": "AIを活用したリバースラーニングで複雑な概念を習得する数千人の開発者に加わりましょう。",
-        "copyright": "Copyright 2025 LogicLatch AI. All rights reserved."
+        "copyright": "Copyright 2025 Cartes. All rights reserved."
     }
 }

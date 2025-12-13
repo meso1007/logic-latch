@@ -14,9 +14,9 @@ export function Header() {
             <div className="flex items-center gap-2">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden">
-                        <img src="/logo.png" alt="LogicLatch AI" className="h-full w-full object-cover" />
+                        <img src="/logo.png" alt="Cartes" className="h-full w-full object-cover" />
                     </div>
-                    <span className="font-bold text-xl text-slate-900">LogicLatch AI</span>
+                    <span className="font-bold text-xl text-slate-900">Cartes</span>
                 </Link>
             </div>
 

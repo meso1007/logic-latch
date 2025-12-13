@@ -1,8 +1,8 @@
-# LogicLatch AI
+# Cartes
 
-LogicLatch AI is an AI-powered learning platform that generates customized learning roadmaps based on your goals. It helps you master programming concepts through "Reverse Learning" - starting with what you want to build and learning the necessary skills to achieve it.
+Cartes is an AI-powered learning platform that generates customized learning roadmaps based on your goals. It helps you master programming concepts through "Reverse Learning" - starting with what you want to build and learning the necessary skills to achieve it.
 
-![LogicLatch AI Main Screen](./main_screen.png)
+![Cartes Main Screen](./main_screen.png)
 
 ## Features
 

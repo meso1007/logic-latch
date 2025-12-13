@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LogicLatch AI",
+  title: "Cartes",
   description: "AI-powered learning roadmap generator",
 };
 

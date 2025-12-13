@@ -57,7 +57,7 @@ const Logo = () => (
         whileTap={{ scale: 0.95 }}
     >
         <div className="relative w-10 h-10">
-            <Image src="/logo.png" alt="LogicLatch AI" fill className="object-contain" />
+            <Image src="/logo.png" alt="Cartes" fill className="object-contain" />
         </div>
     </motion.div>
 );
@@ -73,7 +73,7 @@ const NavHeader = () => {
         >
             <div className="flex items-center gap-3">
                 <Logo />
-                <span className="font-bold text-xl tracking-tight text-slate-900">LogicLatch AI</span>
+                <span className="font-bold text-xl tracking-tight text-slate-900">Cartes</span>
             </div>
 
             <div className="flex items-center gap-4">
@@ -252,7 +252,7 @@ export default function SignupPage() {
                             <motion.div variants={itemVariants} className="mb-8">
                                 <h2 className="font-display font-black text-4xl md:text-5xl text-slate-900 mb-3 tracking-wide">
                                     {t("signupTitle")}<br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">LogicLatch</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">Cartes</span>
                                 </h2>
                                 <p className="text-slate-500 text-sm md:text-base leading-relaxed">
                                     {t("signupSubtitle")}

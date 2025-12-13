@@ -37,7 +37,7 @@ export default function LandingPage() {
                     <div className="w-8 h-8 rounded-xl bg-emerald-950 flex items-center justify-center shadow-lg shadow-emerald-900/10">
                         <span className="text-white font-bold text-lg">R</span>
                     </div>
-                    <span className="font-medium tracking-wide text-emerald-950">Reverse Learn</span>
+                    <span className="font-medium tracking-wide text-emerald-950">Cartes</span>
                 </div>
                 <div className="flex items-center gap-6">
                     <Button variant="ghost" className="hidden md:flex text-slate-500 hover:text-emerald-950 transition-colors hover:bg-emerald-50">
@@ -318,7 +318,7 @@ export default function LandingPage() {
 
                 <div className="mt-32 flex flex-col md:flex-row justify-between items-center max-w-[1400px] mx-auto pt-8 border-t border-slate-100">
                     <div className="text-sm text-slate-500">
-                        © 2024 Reverse Learn. All rights reserved.
+                        © 2025 Cartes. All rights reserved.
                     </div>
                     <div className="flex gap-8 text-sm text-slate-500 mt-4 md:mt-0">
                         <a href="#" className="hover:text-emerald-600 transition-colors">Privacy</a>
