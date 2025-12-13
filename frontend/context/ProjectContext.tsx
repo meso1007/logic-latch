@@ -9,6 +9,7 @@ import { API_BASE_URL } from "@/config/api";
 interface ProjectSummary {
     id: number;
     goal: string;
+    stack: string;
     created_at: string;
 }
 

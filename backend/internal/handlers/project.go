@@ -163,6 +163,7 @@ func (h *Handler) GetProjects(c echo.Context) error {
 	type ProjectSummary struct {
 		ID        uint      `json:"id"`
 		Goal      string    `json:"goal"`
+		Stack     string    `json:"stack"`
 		CreatedAt time.Time `json:"created_at"`
 	}
 
@@ -171,6 +172,7 @@ func (h *Handler) GetProjects(c echo.Context) error {
 		summaries = append(summaries, ProjectSummary{
 			ID:        p.ID,
 			Goal:      p.Goal,
+			Stack:     p.Stack,
 			CreatedAt: p.CreatedAt,
 		})
 	}

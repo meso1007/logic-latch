@@ -147,7 +147,12 @@ export function Sidebar() {
                                     title={isCollapsed ? project.goal : undefined}
                                 >
                                     <MessageSquare className="h-4 w-4 shrink-0 text-emerald-300" />
-                                    {!isCollapsed && <span className="truncate">{project.goal}</span>}
+                                    {!isCollapsed && (
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="truncate font-medium">{project.goal}</span>
+                                            <span className="truncate text-xs text-emerald-400/70">{project.stack}</span>
+                                        </div>
+                                    )}
                                 </Link>
 
                                 {!isCollapsed && (

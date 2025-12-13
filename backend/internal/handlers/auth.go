@@ -78,11 +78,11 @@ func (h *Handler) Login(c echo.Context) error {
 
 	var user models.User
 	if result := h.DB.Where("email = ?", req.Email).First(&user); result.Error != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid password"})
 	}
 
 	// Generate JWT

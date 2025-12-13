@@ -140,13 +140,14 @@ export default function LoginPage() {
             });
 
             if (!response.ok) {
-                throw new Error("Login failed");
+                const data = await response.json();
+                throw new Error(data.error || "Login failed");
             }
 
             const data = await response.json();
             login(data.token, data.user);
-        } catch (err) {
-            setError("Login failed. Please check your credentials.");
+        } catch (err: any) {
+            setError(err.message || "Login failed. Please check your credentials.");
         } finally {
             setLoading(false);
         }
