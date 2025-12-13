@@ -117,7 +117,7 @@ const InputField = ({ label, id, ...props }: InputProps) => (
 
 // --- Main Page ---
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+import { API_BASE_URL } from "@/config/api";
 
 export default function SignupPage() {
     const [loading, setLoading] = useState(false);

@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTranslations } from '@/hooks/useTranslations';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { API_BASE_URL } from "@/config/api";
 
 // --- Animation Variants ---
 
@@ -129,7 +130,7 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+
             const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {

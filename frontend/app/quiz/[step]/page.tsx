@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, ArrowRight, Home, ArrowLeft, Lock as LockIcon } from "lucide-react";
 import { pollJob } from "@/lib/api";
 
+import { API_BASE_URL } from "@/config/api";
+
 export default function QuizPage() {
     const params = useParams();
     const router = useRouter();
@@ -34,7 +36,6 @@ export default function QuizPage() {
     const [stepScores, setStepScores] = useState<any>({});
     const [error, setError] = useState<string | null>(null);
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
     const { t, locale, isLoaded } = useTranslations("Quiz");
 
     const { token, user, logout } = useAuth();

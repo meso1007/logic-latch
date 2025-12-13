@@ -18,7 +18,7 @@ import { containerVariants, itemVariants, cardVariants } from "@/lib/animations"
 import { pollJob } from "@/lib/api";
 
 // Constants
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+import { API_BASE_URL } from "@/config/api";
 
 interface PlanStep {
   step: number;

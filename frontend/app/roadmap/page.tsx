@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Circle, ArrowLeft } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+import { API_BASE_URL } from "@/config/api";
 
 export default function RoadmapPage() {
     const [roadmap, setRoadmap] = useState<any[]>([]);

@@ -10,7 +10,7 @@ import { Users, FolderKanban, Shield, Trash2, UserCog } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+import { API_BASE_URL } from "@/config/api";
 
 interface UserData {
     id: number;
