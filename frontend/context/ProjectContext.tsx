@@ -46,7 +46,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
             if (response.ok) {
                 const data = await response.json();
-                setProjects(data);
+                setProjects(data || []);
             }
         } catch (error) {
             console.error("Failed to fetch projects:", error);

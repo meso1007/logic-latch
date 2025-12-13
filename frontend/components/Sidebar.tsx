@@ -68,7 +68,7 @@ export function Sidebar() {
     const searchParams = useSearchParams();
     const currentProjectId = searchParams.get("id");
 
-    const filteredProjects = projects.filter((project) =>
+    const filteredProjects = (projects || []).filter((project) =>
         project.goal.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
