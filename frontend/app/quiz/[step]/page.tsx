@@ -250,7 +250,7 @@ export default function QuizPage() {
         );
     }
 
-    const isPro = user?.plan === "pro"; // Assuming user object has a plan field
+    const isPro = user?.subscription_plan === "pro";
     const isLocked = stepNumber >= 4 && !isPro;
 
     if (isLocked) {

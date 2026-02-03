@@ -128,7 +128,7 @@ export default function HelpPage() {
         },
     ];
 
-    const filteredFaqs = faqs.filter((faq) => {
+    const filteredFaqs = faqs.filter((faq: any) => {
         const matchesSearch =
             faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
             faq.answer.toLowerCase().includes(searchQuery.toLowerCase());

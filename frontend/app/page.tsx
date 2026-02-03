@@ -305,7 +305,7 @@ export default function Home() {
     if (!editingPlan || editingPlan.steps.length <= 1) return;
     // ステップを削除して、番号を振り直す
     const newSteps = editingPlan.steps
-      .filter((step) => step.step !== stepNumber)
+      .filter((step: any) => step.step !== stepNumber)
       .map((step, index) => ({ ...step, step: index + 1 }));
     setEditingPlan({
       ...editingPlan,
