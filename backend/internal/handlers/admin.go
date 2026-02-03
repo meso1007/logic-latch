@@ -15,21 +15,25 @@ func (h *Handler) GetUsers(c echo.Context) error {
 	}
 
 	type UserResponse struct {
-		ID           uint   `json:"id"`
-		Email        string `json:"email"`
-		Username     string `json:"username"`
-		ProfileImage string `json:"profile_image"`
-		IsAdmin      bool   `json:"is_admin"`
+		ID                 uint   `json:"id"`
+		Email              string `json:"email"`
+		Username           string `json:"username"`
+		ProfileImage       string `json:"profile_image"`
+		IsAdmin            bool   `json:"is_admin"`
+		SubscriptionStatus string `json:"subscription_status"`
+		SubscriptionPlan   string `json:"subscription_plan"`
 	}
 
 	var response []UserResponse
 	for _, u := range users {
 		response = append(response, UserResponse{
-			ID:           u.ID,
-			Email:        u.Email,
-			Username:     u.Username,
-			ProfileImage: u.ProfileImage,
-			IsAdmin:      u.IsAdmin,
+			ID:                 u.ID,
+			Email:              u.Email,
+			Username:           u.Username,
+			ProfileImage:       u.ProfileImage,
+			IsAdmin:            u.IsAdmin,
+			SubscriptionStatus: u.SubscriptionStatus,
+			SubscriptionPlan:   u.SubscriptionPlan,
 		})
 	}
 

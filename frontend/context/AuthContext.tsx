@@ -9,7 +9,8 @@ interface User {
     username?: string;
     profile_image?: string;
     is_admin?: boolean;
-    plan?: string;
+    subscription_status?: string;
+    subscription_plan?: string;
 }
 
 interface AuthContextType {

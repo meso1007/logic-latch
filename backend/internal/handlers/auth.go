@@ -55,17 +55,21 @@ func (h *Handler) Signup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, models.AuthResponse{
 		Token: t,
 		User: struct {
-			ID           uint   `json:"id"`
-			Email        string `json:"email"`
-			Username     string `json:"username"`
-			ProfileImage string `json:"profile_image"`
-			IsAdmin      bool   `json:"is_admin"`
+			ID                 uint   `json:"id"`
+			Email              string `json:"email"`
+			Username           string `json:"username"`
+			ProfileImage       string `json:"profile_image"`
+			IsAdmin            bool   `json:"is_admin"`
+			SubscriptionStatus string `json:"subscription_status"`
+			SubscriptionPlan   string `json:"subscription_plan"`
 		}{
-			ID:           user.ID,
-			Email:        user.Email,
-			Username:     user.Username,
-			ProfileImage: user.ProfileImage,
-			IsAdmin:      user.IsAdmin,
+			ID:                 user.ID,
+			Email:              user.Email,
+			Username:           user.Username,
+			ProfileImage:       user.ProfileImage,
+			IsAdmin:            user.IsAdmin,
+			SubscriptionStatus: user.SubscriptionStatus,
+			SubscriptionPlan:   user.SubscriptionPlan,
 		},
 	})
 }
@@ -101,17 +105,21 @@ func (h *Handler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, models.AuthResponse{
 		Token: t,
 		User: struct {
-			ID           uint   `json:"id"`
-			Email        string `json:"email"`
-			Username     string `json:"username"`
-			ProfileImage string `json:"profile_image"`
-			IsAdmin      bool   `json:"is_admin"`
+			ID                 uint   `json:"id"`
+			Email              string `json:"email"`
+			Username           string `json:"username"`
+			ProfileImage       string `json:"profile_image"`
+			IsAdmin            bool   `json:"is_admin"`
+			SubscriptionStatus string `json:"subscription_status"`
+			SubscriptionPlan   string `json:"subscription_plan"`
 		}{
-			ID:           user.ID,
-			Email:        user.Email,
-			Username:     user.Username,
-			ProfileImage: user.ProfileImage,
-			IsAdmin:      user.IsAdmin,
+			ID:                 user.ID,
+			Email:              user.Email,
+			Username:           user.Username,
+			ProfileImage:       user.ProfileImage,
+			IsAdmin:            user.IsAdmin,
+			SubscriptionStatus: user.SubscriptionStatus,
+			SubscriptionPlan:   user.SubscriptionPlan,
 		},
 	})
 }

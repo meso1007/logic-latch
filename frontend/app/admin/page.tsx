@@ -18,6 +18,8 @@ interface UserData {
     username: string;
     profile_image: string;
     is_admin: boolean;
+    subscription_status?: string;
+    subscription_plan?: string;
 }
 
 interface Stats {
@@ -180,6 +182,7 @@ export default function AdminPage() {
                                         <th className="text-left p-4 font-medium">{t("admin.email")}</th>
                                         <th className="text-left p-4 font-medium">{t("admin.username")}</th>
                                         <th className="text-left p-4 font-medium">{t("admin.role")}</th>
+                                        <th className="text-left p-4 font-medium">{t("admin.plan")}</th>
                                         <th className="text-right p-4 font-medium">{t("admin.actions")}</th>
                                     </tr>
                                 </thead>
@@ -194,6 +197,13 @@ export default function AdminPage() {
                                                     <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-semibold">{t("admin.admin")}</span>
                                                 ) : (
                                                     <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">{t("admin.user")}</span>
+                                                )}
+                                            </td>
+                                            <td className="p-4">
+                                                {u.subscription_plan === "pro" ? (
+                                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-semibold">Pro</span>
+                                                ) : (
+                                                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">Free</span>
                                                 )}
                                             </td>
                                             <td className="p-4 text-right space-x-2">

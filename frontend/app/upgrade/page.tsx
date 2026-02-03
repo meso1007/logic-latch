@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles, Zap, ArrowUpRight, MoveRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,49 @@ export default function UpgradePage() {
     const { user } = useAuth();
     const router = useRouter();
     const { t } = useTranslations();
+    const [loading, setLoading] = useState(false);
+    const { token } = useAuth();
+
+    const handleUpgrade = async (planKey: string) => {
+        if (planKey === "free") return; // No action for free plan for now
+
+        if (user?.subscription_plan === "pro") {
+            // Manage Subscription
+            setLoading(true);
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/portal`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    window.location.href = data.url;
+                }
+            } catch (error) {
+                console.error("Failed to redirect to portal:", error);
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
+        // Subscribe
+        setLoading(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/subscribe`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                window.location.href = data.url;
+            }
+        } catch (error) {
+            console.error("Failed to start subscription:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const plans = [
         {
@@ -123,6 +167,8 @@ export default function UpgradePage() {
                                 </div>
 
                                 <Button
+                                    onClick={() => handleUpgrade(plan.key)}
+                                    disabled={loading || (plan.key === "free" && user?.subscription_plan !== "pro") || (plan.key === "pro" && user?.subscription_plan === "pro")}
                                     className={cn(
                                         "w-full h-12 rounded-full font-medium text-sm transition-all duration-300",
                                         plan.highlight
@@ -130,7 +176,9 @@ export default function UpgradePage() {
                                             : "bg-slate-100 hover:bg-slate-200 text-slate-900 border-0",
                                     )}
                                 >
-                                    {t(`upgrade.plans.${plan.key}.button`)}
+                                    {plan.key === "pro" && user?.subscription_plan === "pro"
+                                        ? t("upgrade.manage")
+                                        : t(`upgrade.plans.${plan.key}.button`)}
                                 </Button>
                             </div>
 

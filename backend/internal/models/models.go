@@ -48,12 +48,16 @@ type GenerateStepQuizRequest struct {
 // --- DB Models ---
 
 type User struct {
-	ID           uint   `gorm:"primaryKey"`
-	Email        string `gorm:"uniqueIndex;size:255"`
-	Username     string `gorm:"size:100"`
-	ProfileImage string `gorm:"size:500"`
-	IsAdmin      bool   `gorm:"default:false"`
-	PasswordHash string
+	ID                 uint   `gorm:"primaryKey"`
+	Email              string `gorm:"uniqueIndex;size:255"`
+	Username           string `gorm:"size:100"`
+	ProfileImage       string `gorm:"size:500"`
+	IsAdmin            bool   `gorm:"default:false"`
+	StripeCustomerID   string `gorm:"size:255"`
+	SubscriptionID     string `gorm:"size:255"`
+	SubscriptionStatus string `gorm:"size:50"` // active, past_due, canceled, etc.
+	SubscriptionPlan   string `gorm:"size:50"` // free, pro
+	PasswordHash       string
 }
 
 type Project struct {
@@ -122,11 +126,13 @@ type LoginRequest struct {
 type AuthResponse struct {
 	Token string `json:"token"`
 	User  struct {
-		ID           uint   `json:"id"`
-		Email        string `json:"email"`
-		Username     string `json:"username"`
-		ProfileImage string `json:"profile_image"`
-		IsAdmin      bool   `json:"is_admin"`
+		ID                 uint   `json:"id"`
+		Email              string `json:"email"`
+		Username           string `json:"username"`
+		ProfileImage       string `json:"profile_image"`
+		IsAdmin            bool   `json:"is_admin"`
+		SubscriptionStatus string `json:"subscription_status"`
+		SubscriptionPlan   string `json:"subscription_plan"`
 	} `json:"user"`
 }
 

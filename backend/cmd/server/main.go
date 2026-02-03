@@ -9,6 +9,7 @@ import (
 	"github/meso1007/reverse-learn/backend/internal/auth"
 	"github/meso1007/reverse-learn/backend/internal/database"
 	"github/meso1007/reverse-learn/backend/internal/handlers"
+	"github/meso1007/reverse-learn/backend/internal/payment"
 	"github/meso1007/reverse-learn/backend/internal/worker"
 
 	"github.com/google/generative-ai-go/genai"
@@ -53,8 +54,9 @@ func main() {
 		jwtSecret = "secret-key-fallback"
 	}
 
+	paymentService := payment.NewService()
 	authMiddlewareHandler := auth.NewAuthHandler(jwtSecret, db)
-	h := handlers.NewHandler(db, w.JobQueue, jwtSecret)
+	h := handlers.NewHandler(db, w.JobQueue, jwtSecret, paymentService)
 
 	// 6. Setup Echo
 	e := echo.New()
@@ -71,6 +73,7 @@ func main() {
 	e.POST("/api/auth/signup", h.Signup)
 	e.POST("/api/auth/login", h.Login)
 	e.POST("/api/propose-plan", h.ProposePlan)
+	e.POST("/api/webhook/stripe", h.StripeWebhook)
 
 	// Protected Routes
 	api := e.Group("/api")
@@ -86,6 +89,10 @@ func main() {
 	api.GET("/projects/:id/steps/:stepNumber", h.GetStep)
 	api.POST("/projects/:id/steps/:stepNumber/score", h.SaveStepScore)
 	api.GET("/jobs/:id", h.GetJob)
+
+	// Payment Routes
+	api.POST("/payment/subscribe", h.Subscribe)
+	api.POST("/payment/portal", h.ManageSubscription)
 
 	// Admin Routes
 	admin := e.Group("/api/admin")
